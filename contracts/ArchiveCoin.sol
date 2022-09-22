@@ -20,9 +20,9 @@ contract ArchiveCoin is
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
     Counters.Counter private _cIdCounter;
-    uint256 private randomRange;
-    uint256 private reward;
-    
+    uint256 private _randomRange;
+    uint256 private _reward;
+
     /**
      * TODO: write private function about the number of mint within one hour. 
      */
@@ -47,8 +47,8 @@ contract ArchiveCoin is
     mapping(uint256 => Comment) cIdToComment;
 
     constructor() ERC20("Archive Coin", "ARCV ") ERC20Permit("Archive Coin") {
-        randomRange = 2;
-        reward = 1;
+        _randomRange = 2;
+        _reward = 1;
         limitPerH = 30;
     }
 
@@ -70,7 +70,7 @@ contract ArchiveCoin is
 
         Post memory _post = Post(msg.sender, title, text, replyTo, block.timestamp);
         pIdToPost[pId] = _post;
-        randomMint(msg.sender);
+        _randomMint(msg.sender);
     }
 
     function getPostForPId(uint256 pId) public view returns (Post memory) {
@@ -121,22 +121,22 @@ contract ArchiveCoin is
     }
 
     // function about randomness
-    function randomMint(address to) private {
-        if (random() == 1) {
-            _mint(to, reward);
+    function _randomMint(address to) private {
+        if (_random() == 1) {
+            _mint(to, _reward);
         }
     }
 
     function setRange(uint256 num) public onlyOwner {
-        randomRange = num;
+        _randomRange = num;
     }
 
     function getRange() public view returns (uint256) {
-        return randomRange;
+        return _randomRange;
     }
 
     // internal function
-    function random() private view returns (uint) {
+    function _random() private view returns (uint) {
         // sha3 and now have been deprecated
         return
             uint(
@@ -148,18 +148,18 @@ contract ArchiveCoin is
                         _cIdCounter.current()
                     )
                 )
-            ) % randomRange;
+            ) % _randomRange;
         // convert hash to integer
         // players is an array of entrants
     }
 
     // function about amount
     function setAmount(uint256 num) public onlyOwner {
-        reward = num;
+        _reward = num;
     }
 
     function getAmount() public view returns (uint256) {
-        return reward;
+        return _reward;
     }
 
     // The following functions are overrides required by Solidity.
