@@ -5,27 +5,45 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const path = require("path");
+
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const ContractFactory = await ethers.getContractFactory("ArchiveCoin");
 
-  const lockedAmount = hre.ethers.utils.parseEther("1");
+  // Start deployment, returning a promise that resolves to a contract object
+  const Contract = await ContractFactory.deploy();   
+  console.log("Contract deployed to address:", Contract.address);
 
-  const Lock = await hre.ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  // We also save the contract's artifacts and address in the frontend directory
+  saveFrontendFiles(Contract);
+}
 
-  await lock.deployed();
+function saveFrontendFiles(contract) {
+  const fs = require("fs");
+  const contractsDir = path.join(__dirname, "..", "frontend", "contracts");
 
-  console.log(
-    `Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
+  if (!fs.existsSync(contractsDir)) {
+    fs.mkdirSync(contractsDir);
+  }
+
+  fs.writeFileSync(
+    path.join(contractsDir, "contract-address.json"),
+    JSON.stringify({ address: contract.address }, undefined, 2)
+  );
+
+  const Artifact = artifacts.readArtifactSync("ArchiveCoin");
+
+  fs.writeFileSync(
+    path.join(contractsDir, "ArchiveCoin.json"),
+    JSON.stringify(Artifact, null, 2)
   );
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+
+main()
+ .then(() => process.exit(0))
+ .catch(error => {
+   console.error(error);
+   process.exit(1);
+ });
