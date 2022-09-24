@@ -1,4 +1,5 @@
 import { BaseProvider } from "@metamask/providers";
+import Link from "next/link";
 
 declare global {
   interface Window {
@@ -8,8 +9,8 @@ declare global {
 
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { PrimaryBtn } from "./atoms/PrimaryBtn";
-import { SecondaryBtn } from "./atoms/SecondaryBtn";
+import { PrimaryBtn } from "../atoms/PrimaryBtn";
+import { SecondaryBtn } from "../atoms/SecondaryBtn";
 
 export const Navbar = () => {
   const [connected, toggleConnect] = useState(false);
@@ -37,7 +38,6 @@ export const Navbar = () => {
     await window.ethereum
       .request({ method: "eth_requestAccounts" })
       .then(() => {
-        console.log("here");
         getAddress();
         window.location.replace(router.pathname);
       });
@@ -46,7 +46,6 @@ export const Navbar = () => {
   useEffect(() => {
     let val = window.ethereum.isConnected();
     if (val) {
-      console.log("here");
       getAddress();
       toggleConnect(val);
     }
@@ -81,7 +80,7 @@ export const Navbar = () => {
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li>
-              <a>Posts</a>
+              <Link href="/posts">Posts</Link>
             </li>
             <li tabIndex={0}>
               <a className="justify-between">
@@ -97,15 +96,15 @@ export const Navbar = () => {
                 </svg>
               </a>
               <ul className="p-2">
-              <li>
-                <a>This month</a>
-              </li>
-              <li>
-                <a>Last month</a>
-              </li>
-              <li>
-                <a>Others</a>
-              </li>
+                <li>
+                  <a>This month</a>
+                </li>
+                <li>
+                  <a>Last month</a>
+                </li>
+                <li>
+                  <a>Others</a>
+                </li>
               </ul>
             </li>
             <li>
@@ -118,7 +117,7 @@ export const Navbar = () => {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">
           <li>
-            <a>Posts</a>
+            <Link href="/posts">Posts</Link>
           </li>
           <li tabIndex={0}>
             <a>
@@ -155,9 +154,12 @@ export const Navbar = () => {
           <PrimaryBtn>Write</PrimaryBtn>
         </div>
         {connected ? (
-          <SecondaryBtn onClick={connectWebsite}>
+          <div className="mx-2">
+            <SecondaryBtn onClick={connectWebsite}>
             {currAddress.substring(0, 7) + "..."}
           </SecondaryBtn>
+          </div>
+          
         ) : (
           <SecondaryBtn onClick={connectWebsite}>Connect Wallet</SecondaryBtn>
         )}
