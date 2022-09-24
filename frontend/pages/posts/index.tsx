@@ -50,7 +50,10 @@ export default () => {
     return (
         <div>
             <Navbar />
-            {posts.map((p, i) => (<SimpleCard title={p.title.length > 14 ? p.title.substring(0, 14) + "..." : p.title} text={p.text.length > 100 ? p.text.substring(0, 100) + "..." : p.text} sender={p.sender.substring(0, 14) + "..."} timestamp={p.timestamp} status={`${repSum[p.pId]} Rep`} key={i}/>)) }
+            <div className="flex justify-around flex-wrap w-5/6 m-auto">
+            {posts.map((p, i) => (<div className="m-2"><SimpleCard title={p.title.length > 14 ? p.title.substring(0, 14) + "..." : p.title} text={p.text.length > 100 ? p.text.substring(0, 100) + "..." : p.text} sender={p.sender.substring(0, 14) + "..."} timestamp={p.timestamp} status={`${repSum[p.pId]} Rep`} key={i}/></div>)) }
+            <SimpleCard title="aaa" text="aaa" sender="aaaa" timestamp="aa" status={`1Rep`}/>
+            </div>
         </div>
     );
 }
