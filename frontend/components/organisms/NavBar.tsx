@@ -8,8 +8,8 @@ declare global {
 
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { PrimaryBtn } from "./atoms/PrimaryBtn";
-import { SecondaryBtn } from "./atoms/SecondaryBtn";
+import { PrimaryBtn } from "../atoms/PrimaryBtn";
+import { SecondaryBtn } from "../atoms/SecondaryBtn";
 
 export const Navbar = () => {
   const [connected, toggleConnect] = useState(false);
@@ -37,7 +37,6 @@ export const Navbar = () => {
     await window.ethereum
       .request({ method: "eth_requestAccounts" })
       .then(() => {
-        console.log("here");
         getAddress();
         window.location.replace(router.pathname);
       });
@@ -46,7 +45,6 @@ export const Navbar = () => {
   useEffect(() => {
     let val = window.ethereum.isConnected();
     if (val) {
-      console.log("here");
       getAddress();
       toggleConnect(val);
     }
