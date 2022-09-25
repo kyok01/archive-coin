@@ -151,15 +151,13 @@ export const Navbar = () => {
       </div>
       <div className="navbar-end">
         <div className="hidden lg:block">
-          <PrimaryBtn>Write</PrimaryBtn>
+          
+            <PrimaryBtn><Link href="/write">Write</Link></PrimaryBtn>
         </div>
         {connected ? (
           <div className="mx-2">
-            <SecondaryBtn onClick={connectWebsite}>
-            {currAddress.substring(0, 7) + "..."}
-          </SecondaryBtn>
+            <SecondaryBtn>{currAddress.substring(0, 7) + "..."}</SecondaryBtn>
           </div>
-          
         ) : (
           <SecondaryBtn onClick={connectWebsite}>Connect Wallet</SecondaryBtn>
         )}
