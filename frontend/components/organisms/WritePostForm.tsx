@@ -1,3 +1,5 @@
+
+
 import { PrimaryBtn } from "components/atoms/PrimaryBtn";
 import { InputWithLabels } from "components/molecules/InputWithLabels";
 import { TextareaWithLabels } from "components/molecules/TextareaWithLabels";
@@ -9,12 +11,13 @@ export const WritePostForm = ({ onSubmit }) => {
         <InputWithLabels
           text="title"
           type="text"
+          name="title"
           placeholder="write"
           AltLabel1="*"
           required={true}
         />
 
-      <TextareaWithLabels text="text" placeholder="write" />
+      <TextareaWithLabels text="text" placeholder="write" name="text" required={true}/>
       </div>
       <div className="flex justify-center my-2">
       <PrimaryBtn type="submit">Submit</PrimaryBtn>

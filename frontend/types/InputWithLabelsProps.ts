@@ -1,5 +1,6 @@
 export type InputWithLabelsProps = {
     text: string;
+    name: string;
     type: string,
     placeholder?: string,
     AltLabel1?: string,

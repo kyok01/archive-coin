@@ -3,6 +3,7 @@ import { InputWithLabelsProps } from "types/InputWithLabelsProps";
 
 export const InputWithLabels = ({
   text,
+  name,
   type,
   placeholder,
   AltLabel1,
@@ -21,6 +22,7 @@ export const InputWithLabels = ({
           type={type}
           placeholder={placeholder}
           className="input input-bordered w-full"
+          name={name}
           required
         />
       ) : (
@@ -28,6 +30,7 @@ export const InputWithLabels = ({
           type={type}
           placeholder={placeholder}
           className="input input-bordered w-full"
+          name={name}
         />
       )}
       {(AltLabel2 || AltLabel3) && (
