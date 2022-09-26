@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
 
-export const sendPost = async(pId, event) => {
+export const sendComment = async(pId, event) => {
   // Stop the form from submitting and refreshing the page.
   event.preventDefault();
 
@@ -24,7 +24,7 @@ export const sendPost = async(pId, event) => {
       let transaction = await contract.setComment(text, pId);
       await transaction.wait()
 
-      alert("Successfully send your Post!");
+      alert("Successfully send your Comment!");
   }
   catch(e) {
       alert( "Upload error"+e )
