@@ -11,6 +11,7 @@ import { WritePostForm } from "components/organisms/WritePostForm";
 import { sendPost } from "util/sendPost";
 import { sendComment } from "util/sendComment";
 import { WriteCommentForm } from "components/organisms/WriteCommentForm";
+import { SimpleCard } from "components/atoms/SimpleCard";
 
 export default ({ pId }) => {
   const [post, setPost] = useState<postType>({});
@@ -19,9 +20,11 @@ export default ({ pId }) => {
   const [reTitle, setReT] = useState<string>("");
   const [isRepP, setIsRepP] = useState(true);
   const [isRepC, setIsRepC] = useState(false);
+  const [repSum, setRepSum] = useState([]);
+
   useEffect(() => {
     getPostForPId();
-    // getAnswerForId();
+    getReplies();
   }, []);
 
   async function getPostForPId() {
@@ -98,7 +101,17 @@ export default ({ pId }) => {
       return bool;
     });
 
+    const arr = [...Array(posts.length + 1)].map((i) => 0);
+
+    const postsWithRep = await Promise.all(
+      posts.map(async (p, i, posts) => {
+        p.replyTo != 0 && arr[p.replyTo]++;
+        return p;
+      })
+    );
+
     setRepPs(repPosts);
+    setRepSum(arr);
   }
 
   async function getRepComments() {
@@ -115,7 +128,6 @@ export default ({ pId }) => {
     let transaction = await contract.getAllComments();
 
     console.log(transaction);
-    
 
     const comments = await Promise.all(
       transaction.map(async (c, i) => {
@@ -132,7 +144,6 @@ export default ({ pId }) => {
     );
 
     console.log(comments);
-    
 
     const repComments = await filter(comments, async (c, i) => {
       const bool = c.replyTo == pId;
@@ -162,32 +173,63 @@ export default ({ pId }) => {
     <>
       <Navbar />
       <div className="mx-2">
-      <div className="w-full max-w-4xl mx-auto">
-        <div>{reTitle}</div>
-        <h1 className="text-2xl font-semibold">{post.title}</h1>
-        <div>
-          <div>{post.sender}</div>
-          <div>{post.timestamp}</div>
+        <div className="w-full max-w-4xl mx-auto">
+          <div>{reTitle}</div>
+          <h1 className="text-2xl font-semibold">{post.title}</h1>
+          <div>
+            <div>{post.sender}</div>
+            <div>{post.timestamp}</div>
+          </div>
+          <p className="my-2">{post.text}</p>
         </div>
-        <p className="my-2">{post.text}</p>
-      </div>
       </div>
 
-      <div className="flex justify-center my-2">
+      {/* <div className="flex justify-center my-2">
         <button
           className="btn btn-secondary max-w-xs w-full"
           onClick={getReplies}
         >
           Show Replies
         </button>
-      </div>
+      </div> */}
       <div className="flex justify-center flex-col items-center my-2">
-        {repPs.map((repP, i) => (
-          <div key={i}>{repP.title}</div>
-        ))}
-        {repCs.map((repC, i) => (
-          <div key={i}>{repC.text}</div>
-        ))}
+        <h2 className="w-full max-w-4xl text-xl">返信コメント</h2>
+        <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
+          <ul className="list-inside" style={{ listStyle: "disc" }}>
+            {repCs.map((repC, i) => (
+              <li key={i}>
+                {repC.sender}
+                <div className="card w-full max-w-4xl bg-base-100 shadow-md p-0">
+                  <div className="card-body p-2 w-full max-w-4xl">
+                    <p style={{ overflowWrap: "normal" }}>{repC.text}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <h2 className="w-full max-w-4xl text-xl">Reply Post</h2>
+
+        <div className="flex justify-around flex-wrap w-full max-w-4xl bg-accent py-4">
+          {repPs.map((repP, i) => (
+            <SimpleCard
+              title={
+                repP.title.length > 14
+                  ? repP.title.substring(0, 14) + "..."
+                  : repP.title
+              }
+              text={
+                repP.text.length > 100
+                  ? repP.text.substring(0, 100) + "..."
+                  : repP.text
+              }
+              sender={repP.sender.substring(0, 14) + "..."}
+              timestamp={repP.timestamp}
+              status={`${repSum[repP.pId]} Rep`}
+            />
+          ))}
+        </div>
       </div>
       <div className="flex items-center my-2 flex-col">
         <div className="btn-group">
