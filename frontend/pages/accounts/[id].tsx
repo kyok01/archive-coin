@@ -10,6 +10,7 @@ import { filter } from "util/filterArr";
 import { SimpleCard } from "components/atoms/SimpleCard";
 import Link from "next/link";
 import { CommentCard } from "components/atoms/CommentCard";
+import { H1 } from "components/atoms/H1";
 
 export default ({ pId }) => {
   const [posts, setPosts] = useState<postType[]>([]);
@@ -137,6 +138,9 @@ export default ({ pId }) => {
   return (
     <>
       <Navbar />
+      <div className="w-5/6 m-auto flex justify-center">
+        <H1 text={pId} />
+      </div>
       <div className="flex justify-center">
         <div className="tabs">
           <a

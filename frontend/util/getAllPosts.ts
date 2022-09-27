@@ -1,14 +1,5 @@
-import { ethers } from "ethers";
-
-export async function getAllPosts(contractAddress, Artifact) {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(contractAddress.address, Artifact.abi, signer)
-    //create an NFT Token
-    const addr = await signer.getAddress();
-    let transaction = await contract.getAllPosts();
+export async function getAllPosts(contract) {
+    const transaction = await contract.getAllPosts();
 
     const posts = await Promise.all(transaction.map(async (p, i) => {
         const dateTime = new Date(p.timestamp * 1000);
@@ -25,7 +16,7 @@ export async function getAllPosts(contractAddress, Artifact) {
 
     const repCountArr = [...Array(posts.length+1)].map(i => 0);
 
-    const postsWithRep = await Promise.all(posts.map(async (p, i, posts) => {
+    await Promise.all(posts.map(async (p, i, posts) => {
         p.replyTo != 0 && repCountArr[p.replyTo]++;
         return p;
     }));
