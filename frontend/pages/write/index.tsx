@@ -1,3 +1,4 @@
+import { H1 } from "components/atoms/H1";
 import { TextareaWithLabels } from "components/molecules/TextareaWithLabels";
 import { Navbar } from "components/organisms/NavBar";
 import { WritePostForm } from "components/organisms/WritePostForm";
@@ -11,7 +12,7 @@ export default () => {
       <div className="m-auto w-4/5 my-2">
       
         <div className="w-4/5 mx-auto">
-        <h1 className="text-2xl w-full max-w-4xl mx-auto">Write Your Post</h1>
+        <H1 text="Write Your Post" />
           <WritePostForm onSubmit={(e) => sendPost(0, e)} />
         </div>
       </div>

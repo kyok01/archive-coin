@@ -1,5 +1,4 @@
 import { GetServerSideProps } from "next";
-import { ethers } from "ethers";
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
@@ -13,6 +12,11 @@ import { sendComment } from "util/sendComment";
 import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 import { SimpleCard } from "components/atoms/SimpleCard";
 import { CommentCard } from "components/atoms/CommentCard";
+import { PostBody } from "components/molecules/PostBody";
+import { getPostForPId } from "util/getPostForPId";
+import { getContract } from "util/getContract";
+import { getAllPosts } from "util/getAllPosts";
+import { getAllComments } from "util/getAllComments";
 
 export default ({ pId }) => {
   const [post, setPost] = useState<postType>({});
@@ -23,77 +27,31 @@ export default ({ pId }) => {
   const [repSum, setRepSum] = useState([]);
 
   useEffect(() => {
-    getPostForPId();
+    getPostForPIdFunc();
     getReplies();
   }, []);
 
-  async function getPostForPId() {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
-    let transaction = await contract.getPostForPId(pId);
-    const dateTime = new Date(transaction.timestamp * 1000);
-    const post = {
-      title: transaction.title,
-      text: transaction.text,
-      sender: transaction.sender,
-      replyTo: transaction.replyTo.toNumber(),
-      timestamp: dateTime.toLocaleDateString(),
-    };
-
-    console.log(post);
+  async function getPostForPIdFunc() {
+    const contract = await getContract(contractAddress, Artifact);
+    const post = await getPostForPId(pId, contract);
     getReplyToInfo(post.replyTo);
     setPost(post);
   }
 
   async function getReplyToInfo(replyTo) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
+    const contract = await getContract(contractAddress, Artifact)
     let transaction = await contract.getPostForPId(replyTo);
     setReT(transaction.title);
   }
 
-  async function getRepPosts() {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
-    let transaction = await contract.getAllPosts();
+  async function getReplies() {
+    await getRepPosts();
+    await getRepComments();
+  }
 
-    const posts = await Promise.all(
-      transaction.map(async (p, i) => {
-        const dateTime = new Date(p.timestamp * 1000);
-        let item = {
-          pId: i + 1,
-          title: p.title,
-          text: p.text,
-          sender: p.sender,
-          replyTo: p.replyTo.toNumber(),
-          timestamp: dateTime.toLocaleDateString(),
-        };
-        return item;
-      })
-    );
+  async function getRepPosts() {
+    const contract = await getContract(contractAddress, Artifact);
+    const { posts, repCountArr } = await getAllPosts(contract);
 
     const repPosts = await filter(posts, async (p, i) => {
       const bool = p.replyTo == pId;
@@ -101,49 +59,13 @@ export default ({ pId }) => {
       return bool;
     });
 
-    const arr = [...Array(posts.length + 1)].map((i) => 0);
-
-    const postsWithRep = await Promise.all(
-      posts.map(async (p, i, posts) => {
-        p.replyTo != 0 && arr[p.replyTo]++;
-        return p;
-      })
-    );
-
     setRepPs(repPosts);
-    setRepSum(arr);
+    setRepSum(repCountArr);
   }
 
   async function getRepComments() {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
-    let transaction = await contract.getAllComments();
-
-    console.log(transaction);
-
-    const comments = await Promise.all(
-      transaction.map(async (c, i) => {
-        const dateTime = new Date(c.timestamp * 1000);
-        let item = {
-          cId: i + 1,
-          text: c.text,
-          sender: c.sender,
-          replyTo: c.replyTo.toNumber(),
-          timestamp: dateTime.toLocaleDateString(),
-        };
-        return item;
-      })
-    );
-
-    console.log(comments);
+    const contract = await getContract(contractAddress, Artifact);
+    const comments = await getAllComments(contract);
 
     const repComments = await filter(comments, async (c, i) => {
       const bool = c.replyTo == pId;
@@ -154,24 +76,19 @@ export default ({ pId }) => {
     setRepCs(repComments);
   }
 
-  async function getReplies() {
-    await getRepPosts();
-    await getRepComments();
-  }
+
 
   return (
     <>
       <Navbar />
       <div className="mx-2">
-        <div className="w-full max-w-4xl mx-auto">
-          <div>{reTitle}</div>
-          <h1 className="text-2xl font-semibold">{post.title}</h1>
-          <div>
-            <div>{post.sender}</div>
-            <div>{post.timestamp}</div>
-          </div>
-          <p className="my-2">{post.text}</p>
-        </div>
+        <PostBody
+          reTitle={reTitle}
+          title={post.title}
+          sender={post.sender}
+          timestamp={post.timestamp}
+          text={post.text}
+        />
       </div>
 
       {/* <div className="flex justify-center my-2">
@@ -189,7 +106,7 @@ export default ({ pId }) => {
             {repCs.map((repC, i) => (
               <li key={i}>
                 {repC.sender}
-                <CommentCard text={repC.text}/>
+                <CommentCard text={repC.text} />
               </li>
             ))}
           </ul>
@@ -213,23 +130,32 @@ export default ({ pId }) => {
               sender={repP.sender.substring(0, 14) + "..."}
               timestamp={repP.timestamp}
               status={`${repSum[repP.pId]} Rep`}
+              key={i}
             />
           ))}
         </div>
       </div>
       <div className="flex items-center my-2 flex-col">
         <div className="btn-group">
-          <button className={`btn w-40 ${tab===1 && "btn-active"}`}  onClick={() => setTab(1)}>
+          <button
+            className={`btn w-40 ${tab === 1 && "btn-active"}`}
+            onClick={() => setTab(1)}
+          >
             Reply as Post
           </button>
-          <button className={`btn w-40 ${tab===2 && "btn-active"}`} onClick={() => setTab(2)}>
+          <button
+            className={`btn w-40 ${tab === 2 && "btn-active"}`}
+            onClick={() => setTab(2)}
+          >
             Comment
           </button>
         </div>
       </div>
       <div className="mx-2">
-        {tab===1 && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
-        {tab===2 && <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />}
+        {tab === 1 && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
+        {tab === 2 && (
+          <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />
+        )}
       </div>
     </>
   );

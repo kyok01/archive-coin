@@ -1,5 +1,4 @@
 import { GetServerSideProps } from "next";
-import { ethers } from "ethers";
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
@@ -10,6 +9,10 @@ import { filter } from "util/filterArr";
 import { SimpleCard } from "components/atoms/SimpleCard";
 import Link from "next/link";
 import { CommentCard } from "components/atoms/CommentCard";
+import { H1 } from "components/atoms/H1";
+import { getAllPosts } from "util/getAllPosts";
+import { getContract } from "util/getContract";
+import { getAllComments } from "util/getAllComments";
 
 export default ({ pId }) => {
   const [posts, setPosts] = useState<postType[]>([]);
@@ -23,93 +26,28 @@ export default ({ pId }) => {
   }, []);
 
   async function getAllPostsForAccount() {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    const contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
-    const transaction = await contract.getAllPosts();
-
-    const posts = await Promise.all(
-      transaction.map(async (p, i) => {
-        const dateTime = new Date(p.timestamp * 1000);
-        let item = {
-          pId: i + 1,
-          title: p.title,
-          text: p.text,
-          sender: p.sender,
-          replyTo: p.replyTo.toNumber(),
-          timestamp: dateTime.toLocaleDateString(),
-        };
-        return item;
-      })
-    );
+    const contract = await getContract(contractAddress, Artifact);
+    const { posts, repCountArr } = await getAllPosts(contract);
 
     const postsForA = await filter(posts, async (c, i) => {
       const bool = c.sender == pId;
       console.log(bool);
       return bool;
     });
-
-    const arr = [...Array(posts.length + 1)].map((i) => 0);
-
-    const postsWithRep = await Promise.all(
-      posts.map(async (p, i, posts) => {
-        p.replyTo != 0 && arr[p.replyTo]++;
-        return p;
-      })
-    );
-    setPosts(posts);
-    setRepSum(arr);
+    setPosts(postsForA);
+    setRepSum(repCountArr);
   }
 
   async function getReplyToInfo(replyTo: number) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
+    const contract = await getContract(contractAddress, Artifact);
     let transaction = await contract.getPostForPId(replyTo);
     return transaction.title;
   }
 
   async function getAllCommentsForAccount() {
-    //After adding your Hardhat network to your metamask, this code will get providers and signers
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    //Pull the deployed contract instance
-    let contract = new ethers.Contract(
-      contractAddress.address,
-      Artifact.abi,
-      signer
-    );
-    //create an NFT Token
-    let transaction = await contract.getAllComments();
+    const contract = await getContract(contractAddress, Artifact);
+    const comments = await getAllComments(contract);
 
-    console.log(transaction);
-
-    const comments = await Promise.all(
-      transaction.map(async (c, i) => {
-        const dateTime = new Date(c.timestamp * 1000);
-        let item = {
-          cId: i + 1,
-          text: c.text,
-          sender: c.sender,
-          replyTo: c.replyTo.toNumber(),
-          timestamp: dateTime.toLocaleDateString(),
-        };
-        return item;
-      })
-    );
     const commentsForA = await filter(comments, async (c, i) => {
       const bool = c.sender == pId;
       console.log(bool);
@@ -137,6 +75,9 @@ export default ({ pId }) => {
   return (
     <>
       <Navbar />
+      <div className="w-5/6 m-auto flex justify-center">
+        <H1 text={pId} />
+      </div>
       <div className="flex justify-center">
         <div className="tabs">
           <a
