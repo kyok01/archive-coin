@@ -7,17 +7,15 @@ import { useState, useEffect } from "react";
 import { postType } from "types/postType";
 import { Navbar } from "components/organisms/NavBar";
 import { filter } from "util/filterArr";
-import { WritePostForm } from "components/organisms/WritePostForm";
-import { sendPost } from "util/sendPost";
-import { sendComment } from "util/sendComment";
-import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 import { SimpleCard } from "components/atoms/SimpleCard";
 import Link from "next/link";
+import { CommentCard } from "components/atoms/CommentCard";
 
 export default ({ pId }) => {
   const [posts, setPosts] = useState<postType[]>([]);
   const [comments, setComments] = useState([]);
   const [repSum, setRepSum] = useState([]);
+  const [tab, setTab] = useState<number>(1);
 
   useEffect(() => {
     getAllPostsForAccount();
@@ -113,12 +111,27 @@ export default ({ pId }) => {
       })
     );
     const commentsForA = await filter(comments, async (c, i) => {
-      const bool = c.replyTo == pId;
+      const bool = c.sender == pId;
       console.log(bool);
       return bool;
     });
 
-    setComments(commentsForA);
+    const commentsForAWithRep = await Promise.all(
+      commentsForA.map(async (c, i) => {
+        const repTitle = await getReplyToInfo(c.replyTo);
+        const item = {
+          cId: c.cId,
+          text: c.text,
+          sender: c.sender,
+          replyTo: c.replyTo,
+          timestamp: c.timestamp,
+          repTitle,
+        };
+        return item;
+      })
+    );
+
+    setComments(commentsForAWithRep);
   }
 
   return (
@@ -126,33 +139,61 @@ export default ({ pId }) => {
       <Navbar />
       <div className="flex justify-center">
         <div className="tabs">
-          <a className="tab tab-bordered tab-active w-24">Posts</a>
-          <a className="tab tab-bordered w-24">Comments</a>
+          <a
+            className={`tab tab-bordered ${tab === 1 && "tab-active"} `}
+            onClick={() => setTab(1)}
+          >
+            Posts
+          </a>
+          <a
+            className={`tab tab-bordered ${tab === 2 && "tab-active"}`}
+            onClick={() => setTab(2)}
+          >
+            Comments
+          </a>
         </div>
       </div>
-      <div className="flex justify-around flex-wrap w-5/6 m-auto">
-        {posts.map((p, i) => (
-          <Link href={`/posts/${p.pId}`} key={i}>
-            <div className="m-2">
-              <SimpleCard
-                title={
-                  p.title.length > 14
-                    ? p.title.substring(0, 14) + "..."
-                    : p.title
-                }
-                text={
-                  p.text.length > 100
-                    ? p.text.substring(0, 100) + "..."
-                    : p.text
-                }
-                sender={p.sender.substring(0, 14) + "..."}
-                timestamp={p.timestamp}
-                status={`${repSum[p.pId]} Rep`}
-              />
-            </div>
-          </Link>
-        ))}
-      </div>
+      {tab === 1 && (
+        <div className="flex justify-around flex-wrap w-5/6 m-auto">
+          {posts.map((p, i) => (
+            <Link href={`/posts/${p.pId}`} key={i}>
+              <div className="m-2">
+                <SimpleCard
+                  title={
+                    p.title.length > 14
+                      ? p.title.substring(0, 14) + "..."
+                      : p.title
+                  }
+                  text={
+                    p.text.length > 100
+                      ? p.text.substring(0, 100) + "..."
+                      : p.text
+                  }
+                  sender={p.sender.substring(0, 14) + "..."}
+                  timestamp={p.timestamp}
+                  status={`${repSum[p.pId]} Rep`}
+                />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+      {tab === 2 && (
+        <div className="flex justify-center">
+          <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
+            <ul className="list-inside" style={{ listStyle: "disc" }}>
+              {comments.map((comment, i) => (
+                <Link href={`/posts/${comment.replyTo}`} key={i}>
+                  <li>
+                    <p>{comment.repTitle}</p>
+                    <CommentCard text={comment.text} />
+                  </li>
+                </Link>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </>
   );
 };
