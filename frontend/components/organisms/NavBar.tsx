@@ -156,7 +156,7 @@ export const Navbar = () => {
         </div>
         {connected ? (
           <div className="mx-2">
-            <SecondaryBtn>{currAddress.substring(0, 7) + "..."}</SecondaryBtn>
+            <SecondaryBtn><Link href={`/accounts/${currAddress}`}>{currAddress.substring(0, 7) + "..."}</Link></SecondaryBtn>
           </div>
         ) : (
           <SecondaryBtn onClick={connectWebsite}>Connect Wallet</SecondaryBtn>

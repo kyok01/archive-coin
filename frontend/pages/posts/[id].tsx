@@ -12,14 +12,14 @@ import { sendPost } from "util/sendPost";
 import { sendComment } from "util/sendComment";
 import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 import { SimpleCard } from "components/atoms/SimpleCard";
+import { CommentCard } from "components/atoms/CommentCard";
 
 export default ({ pId }) => {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);
   const [reTitle, setReT] = useState<string>("");
-  const [isRepP, setIsRepP] = useState(true);
-  const [isRepC, setIsRepC] = useState(false);
+  const [tab, setTab] = useState<number>(1);
   const [repSum, setRepSum] = useState([]);
 
   useEffect(() => {
@@ -159,16 +159,6 @@ export default ({ pId }) => {
     await getRepComments();
   }
 
-  function clickRepP() {
-    setIsRepP(true);
-    setIsRepC(false);
-  }
-
-  function clickRepC() {
-    setIsRepP(false);
-    setIsRepC(true);
-  }
-
   return (
     <>
       <Navbar />
@@ -199,11 +189,7 @@ export default ({ pId }) => {
             {repCs.map((repC, i) => (
               <li key={i}>
                 {repC.sender}
-                <div className="card w-full max-w-4xl bg-base-100 shadow-md p-0">
-                  <div className="card-body p-2 w-full max-w-4xl">
-                    <p style={{ overflowWrap: "normal" }}>{repC.text}</p>
-                  </div>
-                </div>
+                <CommentCard text={repC.text}/>
               </li>
             ))}
           </ul>
@@ -233,17 +219,17 @@ export default ({ pId }) => {
       </div>
       <div className="flex items-center my-2 flex-col">
         <div className="btn-group">
-          <button className="btn btn-active w-40" onClick={() => clickRepP()}>
+          <button className={`btn w-40 ${tab===1 && "btn-active"}`}  onClick={() => setTab(1)}>
             Reply as Post
           </button>
-          <button className="btn w-40" onClick={() => clickRepC()}>
+          <button className={`btn w-40 ${tab===2 && "btn-active"}`} onClick={() => setTab(2)}>
             Comment
           </button>
         </div>
       </div>
       <div className="mx-2">
-        {isRepP && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
-        {isRepC && <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />}
+        {tab===1 && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
+        {tab===2 && <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />}
       </div>
     </>
   );
