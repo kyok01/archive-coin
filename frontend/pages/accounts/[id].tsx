@@ -1,5 +1,4 @@
 import { GetServerSideProps } from "next";
-import { ethers } from "ethers";
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
@@ -48,7 +47,7 @@ export default ({ pId }) => {
   async function getAllCommentsForAccount() {
     const contract = await getContract(contractAddress, Artifact);
     const comments = await getAllComments(contract);
-    
+
     const commentsForA = await filter(comments, async (c, i) => {
       const bool = c.sender == pId;
       console.log(bool);
