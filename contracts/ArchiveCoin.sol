@@ -24,6 +24,7 @@ contract ArchiveCoin is
     Counters.Counter private _cIdCounter;
     uint256 private _randomRange;
     uint256 private _reward;
+    uint256 private _fee;
 
     /**
      * TODO: write private function about the number of mint within one hour. 
@@ -52,6 +53,8 @@ contract ArchiveCoin is
         _randomRange = 2;
         _reward = 1;
         limitPerH = 30;
+        // _price = 100000000000000;
+        _fee = 0.0001 ether;
     }
 
     // functions about Token
@@ -123,8 +126,18 @@ contract ArchiveCoin is
     }
 
     // create NFT Contract
-    function createNftContract() public returns (MyToken){
-        return new MyToken();
+    function createNftContract(uint256 mintPrice) public payable returns (MyToken){
+        require(msg.value == _fee, "msg value is incorrect");
+        return new MyToken(mintPrice);
+    }
+
+    // functions about fee
+    function getFee() public view returns(uint256){
+        return _fee;
+    }
+
+    function setFee(uint256 newFee) public onlyOwner {
+        _fee = newFee;
     }
 
     // function about randomness

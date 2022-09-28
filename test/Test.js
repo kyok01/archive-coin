@@ -4,6 +4,7 @@ const { ethers } = require("hardhat");
 
 describe("Archive Coin", function () {
   async function deployTokenFixture() {
+    // ArchiveCoin Contract
     const ARCV = await ethers.getContractFactory("ArchiveCoin");
     const [owner, addr1, addr2] = await ethers.getSigners();
 
@@ -11,8 +12,14 @@ describe("Archive Coin", function () {
 
     await Contract.deployed();
 
+    // Nft Contract
+    const NC = await ethers.getContractFactory("MyToken");
+    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"));
+
+    await Contract2.deployed();
+
     // Fixtures can return anything you consider useful for your tests
-    return { Contract, owner, addr1, addr2 };
+    return { Contract, Contract2, owner, addr1, addr2 };
   }
   it("Posts", async function () {
     const { Contract, owner, addr1, addr2 } = await loadFixture(
@@ -59,19 +66,55 @@ describe("Archive Coin", function () {
     expect(allComments[0]).to.deep.equal(await Contract.getCommentForCId(1));
   });
 
-  it("createNftContract", async function () {
+  it("CreateNftContract", async function () {
     const { Contract, owner, addr1, addr2 } = await loadFixture(
       deployTokenFixture
     );
 
-    const token = await Contract.createNftContract();
-    console.log(token);
-    console.log(token.hash);
-    console.log(token.getAbi());
+    const token = await Contract.createNftContract(
+      ethers.utils.parseEther("0.0001"),
+      { value: ethers.utils.parseEther("0.0001") }
+    );
+    const result = await ethers.provider
+      .getTransactionReceipt(token.hash)
+      .then(function (transactionReceipt) {
+        logs(transactionReceipt);
+      });
 
-    ethers.provider.getTransactionReceipt(token.hash).then(function(transactionReceipt) {
+    function logs(transactionReceipt) {
+      console.log("//");
       console.log(transactionReceipt);
+      console.log("////");
+      console.log(transactionReceipt.to);
+      console.log("//////");
+      console.log(transactionReceipt.logs[0]);
+      console.log("////////");
+      console.log(transactionReceipt.logs[0].address);
+    }
+    Contract.setFee(ethers.utils.parseEther("0.00001"));
+    await expect(
+      Contract.createNftContract(ethers.utils.parseEther("0.0001"), {
+        value: ethers.utils.parseEther("0.0001"),
+      })
+    ).to.be.revertedWith("msg value is incorrect");
   });
 
+  it("NftContract", async function () {
+    const { Contract2, owner, addr1, addr2 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    await Contract2.safeMint("aaa", {
+      value: ethers.utils.parseEther("0.0001"),
+    });
+    await Contract2.connect(addr1).safeMint("aaa", {
+      value: ethers.utils.parseEther("0.0001"),
+    });
+    await expect(
+      Contract2.connect(addr2).sendValidatedMessage("aaa")
+    ).to.be.revertedWith("You do not have nft");
+
+    await expect(Contract2.ownerOf(1) == owner.address);
+    await expect(Contract2.ownerOf(2) == addr2.address);
   });
 });
