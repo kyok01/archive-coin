@@ -2,11 +2,37 @@ import { Navbar } from 'components/organisms/NavBar'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
+import { getContract } from 'util/getContract'
 import styles from '../styles/Home.module.css'
+import Artifact from "@cont/ArchiveCoin.json";
+import Artifact2 from "@cont/NftContract.json";
+import contractAddress from "@cont/contract-address.json";
+import { ethers } from 'ethers'
+import Web3 from 'web3'
 
 
 
 const Home: NextPage = () => {
+  var web3 = new Web3(Web3.givenProvider);
+  async function clickFunc(){
+    const contract = await getContract(contractAddress, Artifact);
+    const transaction = await contract.createNftContract();
+    console.log(transaction);
+  }
+  async function clickFunc2(){
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
+    const address = provider.getTransactionReceipt("0x94543f3fed0c1a8cc7db88f8b36aa9573b3d9789a2e90f5aeae6a31941a9fe94").then(function(transactionReceipt) {
+      console.log(transactionReceipt);
+      var receipt = web3.eth.getTransactionReceipt('0x94543f3fed0c1a8cc7db88f8b36aa9573b3d9789a2e90f5aeae6a31941a9fe94')
+.then(console.log);
+  });
+  }
+  async function clickFunc3(){
+    const contract = await getContract({
+      "address": "0x9f2F4dDb1a8863bD16e2F91db2489836d81ee6A0"
+    }, Artifact2);
+    await contract.safeMint("aaa");
+  }
   return (
     <div className={styles.container}>
       <Head>
@@ -57,6 +83,9 @@ const Home: NextPage = () => {
       </main>
 
       <button className="btn btn-primary">Hello daisyUI</button>
+      <button className="btn btn-primary" onClick={()=>clickFunc()}>CreateNftContranct</button>
+      <button className="btn btn-primary" onClick={()=>clickFunc2()}>getAddress</button>
+      <button className="btn btn-primary" onClick={()=>clickFunc3()}>safemint</button>
 
       <footer className={styles.footer}>
         <a

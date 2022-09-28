@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+import {MyToken} from "./NftContract.sol";
+
 contract ArchiveCoin is
     ERC20,
     ERC20Burnable,
@@ -118,6 +120,11 @@ contract ArchiveCoin is
             currentIndex += 1;
         }
         return comments;
+    }
+
+    // create NFT Contract
+    function createNftContract() public returns (MyToken){
+        return new MyToken();
     }
 
     // function about randomness

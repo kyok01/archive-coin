@@ -26,7 +26,7 @@ describe("Archive Coin", function () {
     let ownerBalance = await Contract.balanceOf(owner.address);
     console.dir("owner=" + ownerBalance);
 
-    await Contract.connect(addr1).setPost( "title:re", "text:re", 1);
+    await Contract.connect(addr1).setPost("title:re", "text:re", 1);
     // let ownerBalance = await ethers.provider.getBalance(owner.address);
     addr1Balance = await Contract.balanceOf(addr1.address);
     console.dir("addr1=" + addr1Balance);
@@ -35,7 +35,6 @@ describe("Archive Coin", function () {
     // console.log(allPost[0]);
 
     expect(allPost[1]).to.deep.equal(await Contract.getPostForPId(2));
-
   });
 
   it("Comments", async function () {
@@ -58,6 +57,21 @@ describe("Archive Coin", function () {
     // console.log(allPost[0]);
 
     expect(allComments[0]).to.deep.equal(await Contract.getCommentForCId(1));
+  });
+
+  it("createNftContract", async function () {
+    const { Contract, owner, addr1, addr2 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    const token = await Contract.createNftContract();
+    console.log(token);
+    console.log(token.hash);
+    console.log(token.getAbi());
+
+    ethers.provider.getTransactionReceipt(token.hash).then(function(transactionReceipt) {
+      console.log(transactionReceipt);
+  });
 
   });
 });
