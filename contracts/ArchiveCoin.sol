@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+import {MyToken} from "./NftContract.sol";
+
 contract ArchiveCoin is
     ERC20,
     ERC20Burnable,
@@ -22,6 +24,7 @@ contract ArchiveCoin is
     Counters.Counter private _cIdCounter;
     uint256 private _randomRange;
     uint256 private _reward;
+    uint256 private _fee;
 
     /**
      * TODO: write private function about the number of mint within one hour. 
@@ -50,6 +53,8 @@ contract ArchiveCoin is
         _randomRange = 2;
         _reward = 1;
         limitPerH = 30;
+        // _price = 100000000000000;
+        _fee = 0.0001 ether;
     }
 
     // functions about Token
@@ -118,6 +123,21 @@ contract ArchiveCoin is
             currentIndex += 1;
         }
         return comments;
+    }
+
+    // create NFT Contract
+    function createNftContract(uint256 mintPrice) public payable returns (MyToken){
+        require(msg.value == _fee, "msg value is incorrect");
+        return new MyToken(mintPrice);
+    }
+
+    // functions about fee
+    function getFee() public view returns(uint256){
+        return _fee;
+    }
+
+    function setFee(uint256 newFee) public onlyOwner {
+        _fee = newFee;
     }
 
     // function about randomness
