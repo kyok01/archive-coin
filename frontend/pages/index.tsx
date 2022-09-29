@@ -12,22 +12,26 @@ import { ethers } from 'ethers'
 const Home: NextPage = () => {
   async function clickFunc(){
     const contract = await getContract(contractAddress, Artifact);
-    const transaction = await contract.createNftContract();
+    const transaction = await contract.createNftContract(ethers.utils.parseEther("0.0001"), {
+      value: ethers.utils.parseEther("0.0001"),
+    });
     console.log(transaction);
   }
   async function clickFunc2(){
     let provider = new ethers.providers.Web3Provider(window.ethereum);
-    const address = provider.getTransactionReceipt("0x94543f3fed0c1a8cc7db88f8b36aa9573b3d9789a2e90f5aeae6a31941a9fe94").then(function(transactionReceipt) {
+    const address = provider.getTransactionReceipt("0x862c2fab8b020f831d52e36d15310078eb20f10e20cd09bb756b3f02694fd234").then(function(transactionReceipt) {
       console.log(transactionReceipt);
 //       var receipt = web3.eth.getTransactionReceipt('0x94543f3fed0c1a8cc7db88f8b36aa9573b3d9789a2e90f5aeae6a31941a9fe94')
 // .then(console.log);
   });
   }
-  async function clickFunc3(){
+  async function clickFunc3(address: string){
     const contract = await getContract({
-      "address": "0x9f2F4dDb1a8863bD16e2F91db2489836d81ee6A0"
+      "address": address
     }, Artifact2);
-    await contract.safeMint("aaa");
+    await contract.safeMint("aaa", {
+      value: ethers.utils.parseEther("0.0001"),
+    });
   }
   return (
     <div className={styles.container}>
@@ -81,7 +85,7 @@ const Home: NextPage = () => {
       <button className="btn btn-primary">Hello daisyUI</button>
       <button className="btn btn-primary" onClick={()=>clickFunc()}>CreateNftContranct</button>
       <button className="btn btn-primary" onClick={()=>clickFunc2()}>getAddress</button>
-      <button className="btn btn-primary" onClick={()=>clickFunc3()}>safemint</button>
+      <button className="btn btn-primary" onClick={()=>clickFunc3("0xfd52567785DB542Bf47d1647AB1f0AF8d814211B")}>safemint</button>
 
       <footer className={styles.footer}>
         <a
