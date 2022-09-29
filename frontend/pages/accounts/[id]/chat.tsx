@@ -72,7 +72,7 @@ export default ({ pId }) => {
       },
       ArtifactOfN
     );
-    const _message = await contract.getMessageForId(1);
+    const _message = await contract.owner();
     console.log(_message);
     
     // setMessages(_messages);

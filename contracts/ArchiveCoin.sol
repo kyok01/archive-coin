@@ -129,7 +129,7 @@ contract ArchiveCoin is
     // create NFT Contract
     function createNftContract(uint256 mintPrice) public payable returns (MyToken){
         require(msg.value == _fee, "msg value is incorrect");
-        return new MyToken(mintPrice);
+        return new MyToken(mintPrice, msg.sender);
     }
 
     // functions about eoaToContract

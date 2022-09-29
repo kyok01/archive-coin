@@ -1,10 +1,16 @@
-{"abi":[
+{"abi":
+[
 	{
 		"inputs": [
 			{
 				"internalType": "uint256",
 				"name": "_price",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_creator",
+				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -216,6 +222,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getCreator",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -246,6 +265,19 @@
 				"internalType": "struct MyToken.Message",
 				"name": "",
 				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPrice",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -425,6 +457,32 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "_creator",
+				"type": "address"
+			}
+		],
+		"name": "setCreator",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_price",
+				"type": "uint256"
+			}
+		],
+		"name": "setPrice",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes4",
 				"name": "interfaceId",
 				"type": "bytes4"
@@ -509,4 +567,5 @@
 		"stateMutability": "nonpayable",
 		"type": "function"
 	}
-]}
+]
+}
