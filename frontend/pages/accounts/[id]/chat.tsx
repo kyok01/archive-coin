@@ -20,11 +20,15 @@ export default ({ pId }) => {
   }, [nftContAdd]);
   async function getNftContractAddress(pId) {
     // TODO: have to make util function that returns signer
+    try {
     const contract = await getContract(contractAddress, ArtifactOfA);
     const transaction = await contract.getEoaToContract(pId);
     console.log(transaction);
-
-    setNftContAdd(transaction);
+    transaction != "0x0000000000000000000000000000000000000000" && setNftContAdd(transaction);
+    }
+    catch(e) {
+        alert( "Upload error"+e )
+    }
   }
   async function mintNft() {
     const contract = await getContract(
@@ -33,11 +37,13 @@ export default ({ pId }) => {
       },
       ArtifactOfN
     );
-    const price = ethers.utils.parseEther("0.0001");
-    await contract.safeMint(
+    const price = await contract.getPrice();
+    const transaction = await contract.safeMint(
       "https://gateway.pinata.cloud/ipfs/Qmaf2uy3q2orbSmNmUjwmniUh86zUKT3u6JjbmdZapqUMZ",
       { value: price }
     );
+    await transaction.wait();
+    alert("successfully mint")
   }
 
   async function chat(nftContAdd, event) {
@@ -72,10 +78,10 @@ export default ({ pId }) => {
       },
       ArtifactOfN
     );
-    const _message = await contract.owner();
-    console.log(_message);
+    const _messages = await contract.getAllMessages();
+    console.log(_messages);
     
-    // setMessages(_messages);
+    setMessages(_messages);
   }
   return (
     <>
@@ -83,6 +89,7 @@ export default ({ pId }) => {
 
       <div className="flex flex-col justify-center items-center">
         <p>Post: {pId}</p>
+        <p>nftContAdd: {nftContAdd}</p>
         <p>
           If you mint NFT of the contract registered by the account, you can
           paticipate in the annonymous chat.
@@ -93,8 +100,8 @@ export default ({ pId }) => {
           Mint NFT
         </PrimaryBtn>
       </div>
-      <div>
-        {messages.map((m, i)=>(<p>{m.message} by {m.sender}</p>))}
+      <div className="flex justify-center items-center flex-col my-2">
+        {messages.map((m, i)=>(<div>{m.message} by {m.from}</div>))}
       </div>
       <WriteCommentForm onSubmit={(e) => chat(nftContAdd, e)} />
     </>
