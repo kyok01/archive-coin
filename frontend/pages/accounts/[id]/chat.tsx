@@ -1,16 +1,18 @@
-import { PrimaryBtn } from "components/atoms/PrimaryBtn";
-import { Navbar } from "components/organisms/NavBar";
+/* eslint import/order: 0, import/no-unresolved: 0 */
 import { GetServerSideProps } from "next";
-import { getContract } from "util/getContract";
-
 import ArtifactOfA from "@cont/ArchiveCoin.json";
 import ArtifactOfN from "@cont/NftContract.json";
 import contractAddress from "@cont/contract-address.json";
 import { useEffect, useState } from "react";
-import { ethers } from "ethers";
+
+import { PrimaryBtn } from "components/atoms/PrimaryBtn";
+import { Navbar } from "components/organisms/NavBar";
 import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 
-export default ({ pId }) => {
+import { getContract } from "util/getContract";
+
+
+export default function Chat({ pId }){
   const [nftContAdd, setNftContAdd] = useState("");
   const [messages, setMessages] = useState([]);
 

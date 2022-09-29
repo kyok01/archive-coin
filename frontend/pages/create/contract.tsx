@@ -1,5 +1,6 @@
+/* eslint import/order: 0, import/no-unresolved: 0 */
+
 import { Navbar } from "components/organisms/NavBar";
-import Image from "next/image";
 import { getContract } from "util/getContract";
 import ArtifactOfA from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
@@ -9,7 +10,7 @@ import { createNftContract } from "util/createContract";
 import { useEffect, useState } from "react";
 import { SecondaryBtn } from "components/atoms/SecondaryBtn";
 
-export default () => {
+export default function CreateContract() {
     const [fee, setFee] = useState<number | string>("")
     const [cAddress, setCAddress] = useState<string>("")
     const [isCreated, setIsCreated] = useState<boolean>(false);
@@ -49,7 +50,7 @@ export default () => {
       <p>You can select your NFT mint price.</p>
       <p>{cAddress}</p>
       <CreateContractForm onSubmit={(e)=>createAndDisplayCAddress(e)}/>
-      {isCreated && <div><p>You have created! well done! Please register your contract address "{cAddress}".</p><SecondaryBtn type="button" onClick={()=>register(cAddress)}>Register</SecondaryBtn></div>}
+      {isCreated && <div><p>You have created! well done! Please register your contract address {cAddress}.</p><SecondaryBtn type="button" onClick={()=>register(cAddress)}>Register</SecondaryBtn></div>}
     </>
   );
 };

@@ -1,8 +1,11 @@
+/* eslint import/order: 0, import/no-unresolved: 0 */
+
 import { GetServerSideProps } from "next";
+import { useState, useEffect } from "react";
+
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
-import { useState, useEffect } from "react";
 import { postType } from "types/postType";
 import { Navbar } from "components/organisms/NavBar";
 import { filter } from "util/filterArr";
@@ -14,7 +17,7 @@ import { getAllPosts } from "util/getAllPosts";
 import { getContract } from "util/getContract";
 import { getAllComments } from "util/getAllComments";
 
-export default ({ pId }) => {
+export default function AccountId ({ pId }) {
   const [posts, setPosts] = useState<postType[]>([]);
   const [comments, setComments] = useState([]);
   const [repSum, setRepSum] = useState([]);
