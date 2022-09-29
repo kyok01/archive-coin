@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
 
-export const createContract = async(fee, event) => {
+export const createNftContract = async(fee, event) => {
   // Stop the form from submitting and refreshing the page.
   event.preventDefault();
 
