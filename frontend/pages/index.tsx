@@ -1,3 +1,5 @@
+/* eslint import/order: 0, import/no-unresolved: 0 */
+
 import { Navbar } from 'components/organisms/NavBar'
 import type { NextPage } from 'next'
 import Head from 'next/head'

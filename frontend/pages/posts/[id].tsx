@@ -1,3 +1,5 @@
+/* eslint import/order: 0, import/no-unresolved: 0 */
+
 import { GetServerSideProps } from "next";
 
 import Artifact from "@cont/ArchiveCoin.json";
@@ -18,7 +20,7 @@ import { getContract } from "util/getContract";
 import { getAllPosts } from "util/getAllPosts";
 import { getAllComments } from "util/getAllComments";
 
-export default ({ pId }) => {
+export default function PostsId({ pId }){
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);

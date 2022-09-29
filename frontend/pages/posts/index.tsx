@@ -1,3 +1,5 @@
+/* eslint import/order: 0, import/no-unresolved: 0 */
+
 import { SimpleCard } from "components/atoms/SimpleCard";
 import { Navbar } from "components/organisms/NavBar";
 import Artifact from "@cont/ArchiveCoin.json";
@@ -9,7 +11,7 @@ import { getContract } from "util/getContract";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-export default () => {
+export default function PostsIndex() {
   const [posts, setPosts] = useState([]);
   const [repSum, setRepSum] = useState([]);
   useEffect(() => {
