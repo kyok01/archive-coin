@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+import "hardhat/console.sol"; // TODO:must delete
+
 contract MyToken is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     uint256 private mintPrice;
@@ -27,13 +29,16 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         string _message
     );
 
-    constructor(uint256 _price) ERC721("MyToken", "MTK") {
+    address creator;
+
+    constructor(uint256 _price, address _creator) ERC721("MyToken", "MTK") {
         mintPrice = _price;
+        creator = _creator; // not owner. owner = archive coin contract
     }
 
-    function safeMint(string memory uri) payable public {
+    function safeMint(string memory uri) public payable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
-        
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
@@ -42,10 +47,10 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
 
     // fuction about chat
     function sendValidatedMessage(string memory message) public {
-        if (msg.sender != owner()) {
+        if (msg.sender != creator) {
             require(balanceOf(msg.sender) >= 1, "You do not have nft");
-            _sendMessage(message);
         }
+        _sendMessage(message);
     }
 
     function _sendMessage(string memory message) internal {
@@ -61,19 +66,41 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
 
     function getAllMessages() public view returns (Message[] memory) {
         // if the chat is empty
+        uint256 currentIndex = 0;
+        uint256 totalIndex = _messageIdCounter.current();
         if (_messageIdCounter.current() == 0) {
             return new Message[](0);
         }
 
         // give me the ids.
-        Message[] memory messages = new Message[](_messageIdCounter.current());
+        Message[] memory messages = new Message[](totalIndex);
 
         // loads all the message ids on 'ids' list.
-        for (uint i = 1; i <= _messageIdCounter.current(); i++) {
+        for (uint i = 1; i <= totalIndex; i++) {
             // if the sender is different than me.
-            messages[i] = messagesList[i];
+            messages[currentIndex] = messagesList[i];
+            currentIndex += 1;
         }
         return messages;
+    }
+
+    // functions about price
+    function getPrice() public view returns (uint256) {
+        return mintPrice;
+    }
+
+    function setPrice(uint256 _price) public {
+        require(msg.sender == creator, "you are not the creator of this contract");
+       mintPrice = _price;
+    }
+
+    function getCreator() public view returns (address) {
+        return creator;
+    }
+
+    function setCreator(address _creator) public {
+        require(msg.sender == creator, "you are not the creator of this contract");
+        creator = _creator;
     }
 
     // The following functions are overrides required by Solidity.

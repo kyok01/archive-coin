@@ -36,7 +36,8 @@ export default () => {
 
     async function register(address) {
       const contract = await getContract(contractAddress, ArtifactOfA);
-      await contract.setEoaToContract(address);
+      const transaction = await contract.setEoaToContract(address);
+      await transaction.wait();
       alert("successfully register")
       setIsCreated(false);
     }

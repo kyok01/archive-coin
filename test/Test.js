@@ -14,7 +14,7 @@ describe("Archive Coin", function () {
 
     // Nft Contract
     const NC = await ethers.getContractFactory("MyToken");
-    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"));
+    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"), owner.address);
 
     await Contract2.deployed();
 
@@ -83,10 +83,6 @@ describe("Archive Coin", function () {
 
     function logs(transactionReceipt) {
       console.log("//");
-      console.log(transactionReceipt);
-      console.log("////");
-      console.log(transactionReceipt.to);
-      console.log("//////");
       console.log(transactionReceipt.logs[0]);
       console.log("////////");
       console.log(transactionReceipt.logs[0].address);
@@ -105,15 +101,18 @@ describe("Archive Coin", function () {
     );
 
     await Contract2.sendValidatedMessage("aaa");
+    await Contract2.connect(owner).sendValidatedMessage("aaa");
     await Contract2.connect(addr1).safeMint("aaa", {
       value: ethers.utils.parseEther("0.0001"),
     });
+    await Contract2.connect(addr1).sendValidatedMessage("aaa");
     await expect(
       Contract2.connect(addr2).sendValidatedMessage("aaa")
     ).to.be.revertedWith("You do not have nft");
 
     await expect(Contract2.ownerOf(1) == owner.address);
     await expect(Contract2.ownerOf(2) == addr2.address);
+    console.log(await Contract2.getAllMessages());
   });
 
   it("map eoaToContract", async function () {
@@ -124,5 +123,24 @@ describe("Archive Coin", function () {
     await Contract.setEoaToContract(Contract2.address);
     console.log(await Contract.getEoaToContract(owner.address));
     expect(Contract2.address).to.equal(await Contract.getEoaToContract(owner.address))
+  });
+
+  it("creator", async function () {
+    const { Contract2, owner, addr1, addr2 } = await loadFixture(
+      deployTokenFixture
+    );
+    // setCretor
+    await Contract2.setCreator(addr1.address);
+    await Contract2.connect(addr1).setCreator(addr2.address);
+    await expect(
+      Contract2.connect(owner).sendValidatedMessage("aaa")
+    ).to.be.revertedWith("You do not have nft");
+
+    // setPrice
+    await Contract2.connect(addr2).setPrice(ethers.utils.parseEther("0.0001"));
+    await expect(
+      Contract2.setPrice(ethers.utils.parseEther("0.1"))
+    ).to.be.revertedWith("you are not the creator of this contract");
+    console.log(await Contract2.getPrice());
   });
 });
