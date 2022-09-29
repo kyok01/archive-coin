@@ -1,21 +1,22 @@
 import { PrimaryBtn } from "components/atoms/PrimaryBtn";
 import { InputWithLabels } from "components/molecules/InputWithLabels";
 
-export const WriteCommentForm = ({ onSubmit }) => {
+export const CreateContractForm = ({ onSubmit }) => {
   return (
     <form onSubmit={onSubmit}>
       <div className="flex flex-col justify-center items-center">
         <InputWithLabels
-          text="comment"
+          text="mint price"
           type="text"
-          name="text"
-          placeholder="write"
+          name="mintPrice"
+          placeholder="price"
           AltLabel1="*"
+          AltLabel3="ether"
           required={true}
         />
       </div>
       <div className="flex justify-center my-2">
-        <PrimaryBtn type="submit">Submit Comment</PrimaryBtn>
+        <PrimaryBtn type="submit">Create Contract</PrimaryBtn>
       </div>
     </form>
   );
