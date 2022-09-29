@@ -108,12 +108,14 @@ describe("Archive Coin", function () {
     await Contract2.connect(addr1).safeMint("aaa", {
       value: ethers.utils.parseEther("0.0001"),
     });
+    await Contract2.connect(addr1).sendValidatedMessage("aaa");
     await expect(
       Contract2.connect(addr2).sendValidatedMessage("aaa")
     ).to.be.revertedWith("You do not have nft");
 
     await expect(Contract2.ownerOf(1) == owner.address);
     await expect(Contract2.ownerOf(2) == addr2.address);
+    console.log(await Contract2.getAllMessages());
   });
 
   it("map eoaToContract", async function () {
