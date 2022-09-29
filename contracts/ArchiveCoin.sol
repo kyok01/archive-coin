@@ -48,6 +48,7 @@ contract ArchiveCoin is
 
     mapping(uint256 => Post) pIdToPost;
     mapping(uint256 => Comment) cIdToComment;
+    mapping(address => address) eoaToContract;
 
     constructor() ERC20("Archive Coin", "ARCV ") ERC20Permit("Archive Coin") {
         _randomRange = 2;
@@ -129,6 +130,16 @@ contract ArchiveCoin is
     function createNftContract(uint256 mintPrice) public payable returns (MyToken){
         require(msg.value == _fee, "msg value is incorrect");
         return new MyToken(mintPrice);
+    }
+
+    // functions about eoaToContract
+    function getEoaToContract(address e) public view returns(address){
+        return eoaToContract[e];
+    }
+
+    // TODO: msg.sender must be address c creator
+    function setEoaToContract(address c) public {
+        eoaToContract[msg.sender] = c;
     }
 
     // functions about fee

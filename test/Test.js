@@ -100,13 +100,11 @@ describe("Archive Coin", function () {
   });
 
   it("NftContract", async function () {
-    const { Contract2, owner, addr1, addr2 } = await loadFixture(
+    const { Contract, Contract2, owner, addr1, addr2 } = await loadFixture(
       deployTokenFixture
     );
 
-    await Contract2.safeMint("aaa", {
-      value: ethers.utils.parseEther("0.0001"),
-    });
+    await Contract2.sendValidatedMessage("aaa");
     await Contract2.connect(addr1).safeMint("aaa", {
       value: ethers.utils.parseEther("0.0001"),
     });
@@ -116,5 +114,15 @@ describe("Archive Coin", function () {
 
     await expect(Contract2.ownerOf(1) == owner.address);
     await expect(Contract2.ownerOf(2) == addr2.address);
+  });
+
+  it("map eoaToContract", async function () {
+    const { Contract, Contract2, owner, addr1, addr2 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    await Contract.setEoaToContract(Contract2.address);
+    console.log(await Contract.getEoaToContract(owner.address));
+    expect(Contract2.address).to.equal(await Contract.getEoaToContract(owner.address))
   });
 });
