@@ -16,18 +16,18 @@ export default ({ pId }) => {
 
   useEffect(() => {
     getNftContractAddress(pId);
-    nftContAdd && getAllChats(nftContAdd);
+    nftContAdd && (getAllChats(nftContAdd), listenEvent());
   }, [nftContAdd]);
   async function getNftContractAddress(pId) {
     // TODO: have to make util function that returns signer
     try {
-    const contract = await getContract(contractAddress, ArtifactOfA);
-    const transaction = await contract.getEoaToContract(pId);
-    console.log(transaction);
-    transaction != "0x0000000000000000000000000000000000000000" && setNftContAdd(transaction);
-    }
-    catch(e) {
-        alert( "Upload error"+e )
+      const contract = await getContract(contractAddress, ArtifactOfA);
+      const transaction = await contract.getEoaToContract(pId);
+      console.log(transaction);
+      transaction != "0x0000000000000000000000000000000000000000" &&
+        setNftContAdd(transaction);
+    } catch (e) {
+      alert("Upload error" + e);
     }
   }
   async function mintNft() {
@@ -43,32 +43,29 @@ export default ({ pId }) => {
       { value: price }
     );
     await transaction.wait();
-    alert("successfully mint")
+    alert("successfully mint");
   }
 
   async function chat(nftContAdd, event) {
-    
-   
     event.preventDefault();
 
-  try {
-    const contract = await getContract(
+    try {
+      const contract = await getContract(
         {
           address: nftContAdd,
         },
         ArtifactOfN
       );
-        
+
       const text = event.target.text.value;
-     
+
       const transaction = await contract.sendValidatedMessage(text);
-      await transaction.wait()
+      await transaction.wait();
 
       alert("Successfully send your Comment!");
-  }
-  catch(e) {
-      alert( "Upload error"+e )
-  }
+    } catch (e) {
+      alert("Upload error" + e);
+    }
   }
 
   async function getAllChats(nftContAdd) {
@@ -80,8 +77,22 @@ export default ({ pId }) => {
     );
     const _messages = await contract.getAllMessages();
     console.log(_messages);
-    
+
     setMessages(_messages);
+  }
+
+  async function listenEvent() {
+    const contract = await getContract(
+      {
+        address: nftContAdd,
+      },
+      ArtifactOfN
+    );
+    const filter = contract.filters.sendMessageEvent(null, null, null);
+    contract.on(filter, (_id, _from, _message) => {
+      console.log(`by ${_from}, ${_message}`);
+      getAllChats(nftContAdd);
+    });
   }
   return (
     <>
@@ -101,7 +112,11 @@ export default ({ pId }) => {
         </PrimaryBtn>
       </div>
       <div className="flex justify-center items-center flex-col my-2">
-        {messages.map((m, i)=>(<div>{m.message} by {m.from}</div>))}
+        {messages.map((m, i) => (
+          <div key={i}>
+            {m.message} by {m.from}
+          </div>
+        ))}
       </div>
       <WriteCommentForm onSubmit={(e) => chat(nftContAdd, e)} />
     </>
