@@ -12,7 +12,7 @@ import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 import { getContract } from "util/getContract";
 
 
-export default function Chat({ pId }){
+export default function ChatPage({ pId }){
   const [nftContAdd, setNftContAdd] = useState("");
   const [messages, setMessages] = useState([]);
 
