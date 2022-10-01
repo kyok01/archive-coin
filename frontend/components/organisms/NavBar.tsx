@@ -113,7 +113,7 @@ export const Navbar = () => {
           </ul>
         </div>
         <Link href="/">
-          <a className="btn btn-ghost normal-case text-xl">Wadatsumi</a>
+          <a className="btn btn-ghost normal-case text-xl">DockHack</a>
         </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
