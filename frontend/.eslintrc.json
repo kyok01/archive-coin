@@ -6,13 +6,16 @@
     "prettier"
   ],
   "rules": {
-    "import/order": [
-      "error",
-      {
-        "alphabetize": {
-          "order": "asc"
-        }
-      }
-    ]
+    // "import/order": [
+    //   "error",
+    //   {
+    //     "alphabetize": {
+    //       "order": "asc"
+    //     }
+    //   }
+    // ],
+    "import/order": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "import/no-unresolved": "off"
   }
 }

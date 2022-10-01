@@ -3,7 +3,6 @@
 import { GetServerSideProps } from "next";
 import { useState, useEffect } from "react";
 
-
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
 import { postType } from "types/postType";
@@ -16,8 +15,10 @@ import { H1 } from "components/atoms/H1";
 import { getAllPosts } from "util/getAllPosts";
 import { getContract } from "util/getContract";
 import { getAllComments } from "util/getAllComments";
+import { MyPosts } from "components/organisms/MyPosts";
+import { ProfileTab } from "components/organisms/ProfileTab";
 
-export default function AccountId ({ pId }) {
+export default function AccountId({ pId }) {
   const [posts, setPosts] = useState<postType[]>([]);
   const [comments, setComments] = useState([]);
   const [repSum, setRepSum] = useState([]);
@@ -82,65 +83,15 @@ export default function AccountId ({ pId }) {
         <H1 text={pId} />
       </div>
       <div className="flex justify-center">
-        <div className="tabs">
-          <a
-            className={`tab tab-bordered ${tab === 1 && "tab-active"} `}
-            onClick={() => setTab(1)}
-          >
-            Posts
-          </a>
-          <a
-            className={`tab tab-bordered ${tab === 2 && "tab-active"}`}
-            onClick={() => setTab(2)}
-          >
-            Comments
-          </a>
-        </div>
+        <ProfileTab pId={pId} tab={1} />
       </div>
-      {tab === 1 && (
+
         <div className="flex justify-around flex-wrap w-5/6 m-auto">
-          {posts.map((p, i) => (
-            <Link href={`/posts/${p.pId}`} key={i}>
-              <div className="m-2">
-                <SimpleCard
-                  title={
-                    p.title.length > 14
-                      ? p.title.substring(0, 14) + "..."
-                      : p.title
-                  }
-                  text={
-                    p.text.length > 100
-                      ? p.text.substring(0, 100) + "..."
-                      : p.text
-                  }
-                  sender={p.sender.substring(0, 14) + "..."}
-                  timestamp={p.timestamp}
-                  status={`${repSum[p.pId]} Rep`}
-                />
-              </div>
-            </Link>
-          ))}
+          <MyPosts posts={posts} repSum={repSum} />
         </div>
-      )}
-      {tab === 2 && (
-        <div className="flex justify-center">
-          <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
-            <ul className="list-inside" style={{ listStyle: "disc" }}>
-              {comments.map((comment, i) => (
-                <Link href={`/posts/${comment.replyTo}`} key={i}>
-                  <li>
-                    <p>{comment.repTitle}</p>
-                    <CommentCard text={comment.text} />
-                  </li>
-                </Link>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
     </>
   );
-};
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;

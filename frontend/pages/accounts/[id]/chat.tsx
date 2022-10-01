@@ -10,11 +10,18 @@ import { Navbar } from "components/organisms/NavBar";
 import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 
 import { getContract } from "util/getContract";
+import { H1 } from "components/atoms/H1";
+import { ProfileTab } from "components/organisms/ProfileTab";
+import Image from "next/image";
+import { ChatRoomTitle } from "components/organisms/ChatRoomTitle";
+import { Message } from "components/atoms/Message";
+import { getSigner } from "util/getSigner";
+import { ChatInputForm } from "components/organisms/ChatInputForm";
 
-
-export default function Chat({ pId }){
+export default function ChatPage({ pId }) {
   const [nftContAdd, setNftContAdd] = useState("");
   const [messages, setMessages] = useState([]);
+  const [draftMessage, setDraftMessage] = useState("");
 
   useEffect(() => {
     getNftContractAddress(pId);
@@ -31,21 +38,6 @@ export default function Chat({ pId }){
     } catch (e) {
       alert("Upload error" + e);
     }
-  }
-  async function mintNft() {
-    const contract = await getContract(
-      {
-        address: nftContAdd,
-      },
-      ArtifactOfN
-    );
-    const price = await contract.getPrice();
-    const transaction = await contract.safeMint(
-      "https://gateway.pinata.cloud/ipfs/Qmaf2uy3q2orbSmNmUjwmniUh86zUKT3u6JjbmdZapqUMZ",
-      { value: price }
-    );
-    await transaction.wait();
-    alert("successfully mint");
   }
 
   async function chat(nftContAdd, event) {
@@ -70,6 +62,26 @@ export default function Chat({ pId }){
     }
   }
 
+  async function sendMessage(nftContAdd, event) {
+    event.preventDefault();
+
+    try {
+      const contract = await getContract(
+        {
+          address: nftContAdd,
+        },
+        ArtifactOfN
+      );
+
+      const transaction = await contract.sendValidatedMessage(draftMessage);
+      await transaction.wait();
+
+      alert("Successfully send your Message!");
+    } catch (e) {
+      alert("Upload error" + e);
+    }
+  }
+
   async function getAllChats(nftContAdd) {
     const contract = await getContract(
       {
@@ -78,9 +90,22 @@ export default function Chat({ pId }){
       ArtifactOfN
     );
     const _messages = await contract.getAllMessages();
-    console.log(_messages);
+    const signer = await getSigner();
+    const addr = await signer.getAddress();
 
-    setMessages(_messages);
+    const _messagesWithBoolean = await Promise.all(
+      _messages.map(async (m, i) => {
+        const isMessageOfAccount = m.from == addr;
+        const item = {
+          from: m.from,
+          message: m.message,
+          timestamp: m.timestamp,
+          isMessageOfAccount,
+        };
+        return item;
+      })
+    );
+    setMessages(_messagesWithBoolean);
   }
 
   async function listenEvent() {
@@ -99,31 +124,43 @@ export default function Chat({ pId }){
   return (
     <>
       <Navbar />
+      <div className="w-5/6 m-auto flex justify-center">
+        <H1 text={pId} />
+      </div>
+      <div className="flex justify-center">
+        <ProfileTab pId={pId} tab={3} />
+      </div>
+      <div className="container mx-auto w-5/6 lg:w-3/5">
+        <ChatRoomTitle title="Dock Hack Token" />
 
-      <div className="flex flex-col justify-center items-center">
-        <p>Post: {pId}</p>
-        <p>nftContAdd: {nftContAdd}</p>
-        <p>
-          If you mint NFT of the contract registered by the account, you can
-          paticipate in the annonymous chat.
-        </p>
-      </div>
-      <div className="flex justify-center my-2">
-        <PrimaryBtn type="submit" onClick={() => mintNft()}>
-          Mint NFT
-        </PrimaryBtn>
-      </div>
-      <div className="flex justify-center items-center flex-col my-2">
-        {messages.map((m, i) => (
-          <div key={i}>
-            {m.message} by {m.from}
+        <div className="min-w-full lg:grid lg:grid-cols-2">
+          <div className="lg:col-span-2 lg:block">
+            <div className="w-full">
+              <div
+                className="relative w-full p-6 overflow-y-auto h-50v lg:h-60v"
+                id="target"
+              >
+                <ul className="space-y-2">
+                  {messages.map((m, i) => (
+                    <Message
+                      isMessageOfAccount={m.isMessageOfAccount}
+                      text={m.message}
+                      from={m.from}
+                      key={i}
+                    />
+                  ))}
+                </ul>
+              </div>
+
+              <ChatInputForm onClick={(e) => sendMessage(nftContAdd, e)} onChange={(e) => setDraftMessage(e.target.value)} draftMessage={draftMessage}/>
+
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-      <WriteCommentForm onSubmit={(e) => chat(nftContAdd, e)} />
     </>
   );
-};
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
