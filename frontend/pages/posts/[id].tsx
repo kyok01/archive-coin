@@ -19,14 +19,17 @@ import { getPostForPId } from "util/getPostForPId";
 import { getContract } from "util/getContract";
 import { getAllPosts } from "util/getAllPosts";
 import { getAllComments } from "util/getAllComments";
+import { ReplyPostList } from "components/organisms/ReplyPostList";
+import { getRepPosts } from "util/getRepPosts";
 
-export default function PostsId({ pId }){
+export default function PostsId({ pId }) {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);
   const [reTitle, setReT] = useState<string>("");
   const [tab, setTab] = useState<number>(1);
   const [repSum, setRepSum] = useState([]);
+  const [openPId, setOpenPId] = useState([]);
 
   useEffect(() => {
     getPostForPIdFunc();
@@ -41,44 +44,37 @@ export default function PostsId({ pId }){
   }
 
   async function getReplyToInfo(replyTo) {
-    const contract = await getContract(contractAddress, Artifact)
+    const contract = await getContract(contractAddress, Artifact);
     let transaction = await contract.getPostForPId(replyTo);
     setReT(transaction.title);
   }
 
   async function getReplies() {
-    await getRepPosts();
-    await getRepComments();
+    await getAndSetRepPosts();
+    // await getRepComments();
   }
 
-  async function getRepPosts() {
+  
+  async function getAndSetRepPosts() {
     const contract = await getContract(contractAddress, Artifact);
-    const { posts, repCountArr } = await getAllPosts(contract);
-
-    const repPosts = await filter(posts, async (p, i) => {
-      const bool = p.replyTo == pId;
-      console.log(bool);
-      return bool;
-    });
+    const {repPosts, repCountArr} = await getRepPosts(pId, contract);
 
     setRepPs(repPosts);
     setRepSum(repCountArr);
   }
 
-  async function getRepComments() {
-    const contract = await getContract(contractAddress, Artifact);
-    const comments = await getAllComments(contract);
+  // async function getRepComments() {
+  //   const contract = await getContract(contractAddress, Artifact);
+  //   const comments = await getAllComments(contract);
 
-    const repComments = await filter(comments, async (c, i) => {
-      const bool = c.replyTo == pId;
-      console.log(bool);
-      return bool;
-    });
+  //   const repComments = await filter(comments, async (c, i) => {
+  //     const bool = c.replyTo == pId;
+  //     console.log(bool);
+  //     return bool;
+  //   });
 
-    setRepCs(repComments);
-  }
-
-
+  //   setRepCs(repComments);
+  // }
 
   return (
     <>
@@ -102,39 +98,24 @@ export default function PostsId({ pId }){
         </button>
       </div> */}
       <div className="flex justify-center flex-col items-center my-2">
-        <h2 className="w-full max-w-4xl text-xl">返信コメント</h2>
+        <h2 className="w-full max-w-4xl text-xl">Reactions</h2>
         <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
           <ul className="list-inside" style={{ listStyle: "disc" }}>
-            {repCs.map((repC, i) => (
+            {repPs.map((repP, i) => (
               <li key={i}>
-                {repC.sender}
-                <CommentCard text={repC.text} />
+                {repP.sender.substring(0, 14) + "..."}
+                <CommentCard text={repP.text} />
+                {repSum[repP.pId] > 0 && !openPId.includes(repP.pId) && (
+                  <p className="text-left pl-2">
+                    <span
+                      onClick={() => setOpenPId([...openPId, repP.pId])}
+                    >{`▼ ${repSum[repP.pId]} REPLIES`}</span>
+                  </p>
+                )}
+                {openPId.includes(repP.pId) && <div className="ml-4"><ReplyPostList pId={repP.pId} repSum={repSum} setOpenPId={setOpenPId} openPId={openPId}/></div>}
               </li>
             ))}
           </ul>
-        </div>
-
-        <h2 className="w-full max-w-4xl text-xl">Reply Post</h2>
-
-        <div className="flex justify-around flex-wrap w-full max-w-4xl bg-accent py-4">
-          {repPs.map((repP, i) => (
-            <SimpleCard
-              title={
-                repP.title.length > 14
-                  ? repP.title.substring(0, 14) + "..."
-                  : repP.title
-              }
-              text={
-                repP.text.length > 100
-                  ? repP.text.substring(0, 100) + "..."
-                  : repP.text
-              }
-              sender={repP.sender.substring(0, 14) + "..."}
-              timestamp={repP.timestamp}
-              status={`${repSum[repP.pId]} Rep`}
-              key={i}
-            />
-          ))}
         </div>
       </div>
       <div className="flex items-center my-2 flex-col">
@@ -161,7 +142,7 @@ export default function PostsId({ pId }){
       </div>
     </>
   );
-};
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
