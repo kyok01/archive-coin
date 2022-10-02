@@ -88,6 +88,7 @@ export default function PostsId({ pageId }) {
           sender={post.sender}
           timestamp={post.timestamp}
           text={post.text}
+          replyTo={post.replyTo}
         />
       </div>
 
