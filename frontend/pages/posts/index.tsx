@@ -21,7 +21,8 @@ export default function PostsIndex() {
   async function initial() {
     const contract = await getContract(contractAddress, Artifact);
     const { posts, repCountArr } = await getAllPosts(contract);
-    setPosts(posts);
+    const revercePost = posts.reverse();
+    setPosts(revercePost);
     setRepSum(repCountArr);
   }
 
@@ -47,7 +48,7 @@ export default function PostsIndex() {
                     : p.text
                 }
                 sender={p.sender.substring(0, 14) + "..."}
-                timestamp={p.timestamp}
+                timestamp={p.timestamp.slice(0, -3)}
                 status={`${repSum[p.pId]} Rep`}
               />
             </div>
@@ -56,4 +57,4 @@ export default function PostsIndex() {
       </div>
     </div>
   );
-};
+}

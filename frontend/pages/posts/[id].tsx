@@ -4,7 +4,7 @@ import { GetServerSideProps } from "next";
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { postType } from "types/postType";
 import { Navbar } from "components/organisms/NavBar";
 import { filter } from "util/filterArr";
@@ -17,16 +17,20 @@ import { CommentCard } from "components/atoms/CommentCard";
 import { PostBody } from "components/molecules/PostBody";
 import { getPostForPId } from "util/getPostForPId";
 import { getContract } from "util/getContract";
-import { getAllPosts } from "util/getAllPosts";
-import { getAllComments } from "util/getAllComments";
+import { ReplyPostList } from "components/organisms/ReplyPostList";
+import { getRepPosts } from "util/getRepPosts";
+import Link from "next/link";
+import { SecondaryBtn } from "components/atoms/SecondaryBtn";
+import { H2 } from "components/atoms/H2";
 
-export default function PostsId({ pId }){
+export default function PostsId({ pageId }) {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);
   const [reTitle, setReT] = useState<string>("");
-  const [tab, setTab] = useState<number>(1);
   const [repSum, setRepSum] = useState([]);
+  const [openPId, setOpenPId] = useState([]);
+  const scrollBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getPostForPIdFunc();
@@ -35,51 +39,45 @@ export default function PostsId({ pId }){
 
   async function getPostForPIdFunc() {
     const contract = await getContract(contractAddress, Artifact);
-    const post = await getPostForPId(pId, contract);
+    const post = await getPostForPId(pageId, contract);
     getReplyToInfo(post.replyTo);
     setPost(post);
   }
 
   async function getReplyToInfo(replyTo) {
-    const contract = await getContract(contractAddress, Artifact)
+    const contract = await getContract(contractAddress, Artifact);
     let transaction = await contract.getPostForPId(replyTo);
     setReT(transaction.title);
   }
 
   async function getReplies() {
-    await getRepPosts();
-    await getRepComments();
+    await getAndSetRepPosts();
+    // await getRepComments();
   }
 
-  async function getRepPosts() {
+  async function getAndSetRepPosts() {
     const contract = await getContract(contractAddress, Artifact);
-    const { posts, repCountArr } = await getAllPosts(contract);
-
-    const repPosts = await filter(posts, async (p, i) => {
-      const bool = p.replyTo == pId;
-      console.log(bool);
-      return bool;
-    });
+    const { repPosts, repCountArr } = await getRepPosts(pageId, contract);
 
     setRepPs(repPosts);
     setRepSum(repCountArr);
   }
+  // async function getRepComments() {
+  //   const contract = await getContract(contractAddress, Artifact);
+  //   const comments = await getAllComments(contract);
 
-  async function getRepComments() {
-    const contract = await getContract(contractAddress, Artifact);
-    const comments = await getAllComments(contract);
+  //   const repComments = await filter(comments, async (c, i) => {
+  //     const bool = c.replyTo == pId;
+  //     console.log(bool);
+  //     return bool;
+  //   });
 
-    const repComments = await filter(comments, async (c, i) => {
-      const bool = c.replyTo == pId;
-      console.log(bool);
-      return bool;
-    });
+  //   setRepCs(repComments);
+  // }
 
-    setRepCs(repComments);
+  function scrollIntoBottom() {
+    scrollBottomRef?.current?.scrollIntoView();
   }
-
-
-
   return (
     <>
       <Navbar />
@@ -102,69 +100,69 @@ export default function PostsId({ pId }){
         </button>
       </div> */}
       <div className="flex justify-center flex-col items-center my-2">
-        <h2 className="w-full max-w-4xl text-xl">返信コメント</h2>
+        <SecondaryBtn type="button" onClick={() => scrollIntoBottom()}>
+          Mention
+        </SecondaryBtn>
+
+        <div className="my-4">
+          <H2>Reactions</H2>
+        </div>
+
         <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
           <ul className="list-inside" style={{ listStyle: "disc" }}>
-            {repCs.map((repC, i) => (
+            {repPs.map((repP, i) => (
               <li key={i}>
-                {repC.sender}
-                <CommentCard text={repC.text} />
+                <Link href={`/accounts/${repP.sender}`}>
+                  {repP.sender.substring(0, 14) + "..."}
+                </Link>
+                {/* TODO: we should change a tag into something good for frontend*/}
+                <a href={`/posts/${repP.pId}`}>
+                  <CommentCard text={repP.text} />
+                </a>
+                {repSum[repP.pId] > 0 && !openPId.includes(repP.pId) && (
+                  <p className="text-left pl-2 text-primary">
+                    <span
+                      onClick={() => setOpenPId([...openPId, repP.pId])}
+                    >{`▼ ${repSum[repP.pId]} REPLIES`}</span>
+                  </p>
+                )}
+                {repSum[repP.pId] > 0 && openPId.includes(repP.pId) && (
+                  <p className="text-left pl-2 text-primary">
+                    <span
+                      onClick={() =>
+                        setOpenPId(openPId.filter((o) => o !== repP.pId))
+                      }
+                    >{`▲ CLOSE REPLIES`}</span>
+                  </p>
+                )}
+                {openPId.includes(repP.pId) && (
+                  <div className="ml-4">
+                    <ReplyPostList
+                      pId={repP.pId}
+                      repSum={repSum}
+                      setOpenPId={setOpenPId}
+                      openPId={openPId}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         </div>
-
-        <h2 className="w-full max-w-4xl text-xl">Reply Post</h2>
-
-        <div className="flex justify-around flex-wrap w-full max-w-4xl bg-accent py-4">
-          {repPs.map((repP, i) => (
-            <SimpleCard
-              title={
-                repP.title.length > 14
-                  ? repP.title.substring(0, 14) + "..."
-                  : repP.title
-              }
-              text={
-                repP.text.length > 100
-                  ? repP.text.substring(0, 100) + "..."
-                  : repP.text
-              }
-              sender={repP.sender.substring(0, 14) + "..."}
-              timestamp={repP.timestamp}
-              status={`${repSum[repP.pId]} Rep`}
-              key={i}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="flex items-center my-2 flex-col">
-        <div className="btn-group">
-          <button
-            className={`btn w-40 ${tab === 1 && "btn-active"}`}
-            onClick={() => setTab(1)}
-          >
-            Reply as Post
-          </button>
-          <button
-            className={`btn w-40 ${tab === 2 && "btn-active"}`}
-            onClick={() => setTab(2)}
-          >
-            Comment
-          </button>
+        <div className="mt-4">
+          <H2>Mention</H2>
         </div>
       </div>
       <div className="mx-2">
-        {tab === 1 && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
-        {tab === 2 && (
-          <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />
-        )}
+        <WritePostForm onSubmit={(e) => sendPost(pageId, e)} />
+        <div ref={scrollBottomRef} />
       </div>
     </>
   );
-};
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
 
-  return { props: { pId: id } };
+  return { props: { pageId: id } };
 };

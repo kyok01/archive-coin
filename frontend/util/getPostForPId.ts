@@ -8,7 +8,7 @@ export async function getPostForPId(pId, contract) {
     text: transaction.text,
     sender: transaction.sender,
     replyTo: transaction.replyTo.toNumber(),
-    timestamp: dateTime.toLocaleDateString(),
+    timestamp: dateTime.toLocaleString(),
   };
   return post;
 }
