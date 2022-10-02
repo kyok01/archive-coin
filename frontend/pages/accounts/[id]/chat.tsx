@@ -3,7 +3,7 @@ import { GetServerSideProps } from "next";
 import ArtifactOfA from "@cont/ArchiveCoin.json";
 import ArtifactOfN from "@cont/NftContract.json";
 import contractAddress from "@cont/contract-address.json";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { PrimaryBtn } from "components/atoms/PrimaryBtn";
 import { Navbar } from "components/organisms/NavBar";
@@ -23,10 +23,17 @@ export default function ChatPage({ pId }) {
   const [messages, setMessages] = useState([]);
   const [draftMessage, setDraftMessage] = useState("");
 
+  const scrollBottomRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     getNftContractAddress(pId);
     nftContAdd && (getAllChats(nftContAdd), listenEvent());
   }, [nftContAdd]);
+
+  useEffect(()=>{
+    autoScroll();
+  },[messages])
+
   async function getNftContractAddress(pId) {
     // TODO: have to make util function that returns signer
     try {
@@ -40,26 +47,8 @@ export default function ChatPage({ pId }) {
     }
   }
 
-  async function chat(nftContAdd, event) {
-    event.preventDefault();
-
-    try {
-      const contract = await getContract(
-        {
-          address: nftContAdd,
-        },
-        ArtifactOfN
-      );
-
-      const text = event.target.text.value;
-
-      const transaction = await contract.sendValidatedMessage(text);
-      await transaction.wait();
-
-      alert("Successfully send your Comment!");
-    } catch (e) {
-      alert("Upload error" + e);
-    }
+  function autoScroll() {
+    scrollBottomRef?.current?.scrollIntoView();
   }
 
   async function sendMessage(nftContAdd, event) {
@@ -150,6 +139,7 @@ export default function ChatPage({ pId }) {
                     />
                   ))}
                 </ul>
+                <div ref={scrollBottomRef}/>
               </div>
 
               <ChatInputForm onClick={(e) => sendMessage(nftContAdd, e)} onChange={(e) => setDraftMessage(e.target.value)} draftMessage={draftMessage}/>
