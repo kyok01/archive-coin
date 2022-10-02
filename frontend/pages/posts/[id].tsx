@@ -4,7 +4,7 @@ import { GetServerSideProps } from "next";
 
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { postType } from "types/postType";
 import { Navbar } from "components/organisms/NavBar";
 import { filter } from "util/filterArr";
@@ -20,15 +20,17 @@ import { getContract } from "util/getContract";
 import { ReplyPostList } from "components/organisms/ReplyPostList";
 import { getRepPosts } from "util/getRepPosts";
 import Link from "next/link";
+import { SecondaryBtn } from "components/atoms/SecondaryBtn";
+import { H2 } from "components/atoms/H2";
 
 export default function PostsId({ pageId }) {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);
   const [reTitle, setReT] = useState<string>("");
-  const [tab, setTab] = useState<number>(1);
   const [repSum, setRepSum] = useState([]);
   const [openPId, setOpenPId] = useState([]);
+  const scrollBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getPostForPIdFunc();
@@ -53,10 +55,9 @@ export default function PostsId({ pageId }) {
     // await getRepComments();
   }
 
-  
   async function getAndSetRepPosts() {
     const contract = await getContract(contractAddress, Artifact);
-    const {repPosts, repCountArr} = await getRepPosts(pageId, contract);
+    const { repPosts, repCountArr } = await getRepPosts(pageId, contract);
 
     setRepPs(repPosts);
     setRepSum(repCountArr);
@@ -74,6 +75,9 @@ export default function PostsId({ pageId }) {
   //   setRepCs(repComments);
   // }
 
+  function scrollIntoBottom() {
+    scrollBottomRef?.current?.scrollIntoView();
+  }
   return (
     <>
       <Navbar />
@@ -96,14 +100,25 @@ export default function PostsId({ pageId }) {
         </button>
       </div> */}
       <div className="flex justify-center flex-col items-center my-2">
-        <h2 className="w-full max-w-4xl text-xl">Reactions</h2>
+        <SecondaryBtn type="button" onClick={() => scrollIntoBottom()}>
+          Mention
+        </SecondaryBtn>
+
+        <div className="my-4">
+          <H2>Reactions</H2>
+        </div>
+
         <div className="flex flex-start w-full max-w-4xl bg-accent px-8 py-2">
           <ul className="list-inside" style={{ listStyle: "disc" }}>
             {repPs.map((repP, i) => (
               <li key={i}>
-                <Link href={`/accounts/${repP.sender}`}>{repP.sender.substring(0, 14) + "..."}</Link>
+                <Link href={`/accounts/${repP.sender}`}>
+                  {repP.sender.substring(0, 14) + "..."}
+                </Link>
                 {/* TODO: we should change a tag into something good for frontend*/}
-                <a href={`/posts/${repP.pId}`} ><CommentCard text={repP.text} /></a>
+                <a href={`/posts/${repP.pId}`}>
+                  <CommentCard text={repP.text} />
+                </a>
                 {repSum[repP.pId] > 0 && !openPId.includes(repP.pId) && (
                   <p className="text-left pl-2 text-primary">
                     <span
@@ -114,37 +129,33 @@ export default function PostsId({ pageId }) {
                 {repSum[repP.pId] > 0 && openPId.includes(repP.pId) && (
                   <p className="text-left pl-2 text-primary">
                     <span
-                      onClick={() => setOpenPId(openPId.filter((o) => o!== repP.pId))}
+                      onClick={() =>
+                        setOpenPId(openPId.filter((o) => o !== repP.pId))
+                      }
                     >{`▲ CLOSE REPLIES`}</span>
                   </p>
                 )}
-                {openPId.includes(repP.pId) && <div className="ml-4"><ReplyPostList pId={repP.pId} repSum={repSum} setOpenPId={setOpenPId} openPId={openPId}/></div>}
+                {openPId.includes(repP.pId) && (
+                  <div className="ml-4">
+                    <ReplyPostList
+                      pId={repP.pId}
+                      repSum={repSum}
+                      setOpenPId={setOpenPId}
+                      openPId={openPId}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         </div>
-      </div>
-      <div className="flex items-center my-2 flex-col">
-        <div className="btn-group">
-          <button
-            className={`btn w-40 ${tab === 1 && "btn-active"}`}
-            onClick={() => setTab(1)}
-          >
-            Reply as Post
-          </button>
-          <button
-            className={`btn w-40 ${tab === 2 && "btn-active"}`}
-            onClick={() => setTab(2)}
-          >
-            Comment
-          </button>
+        <div className="mt-4">
+          <H2>Mention</H2>
         </div>
       </div>
       <div className="mx-2">
-        {tab === 1 && <WritePostForm onSubmit={(e) => sendPost(pageId, e)} />}
-        {tab === 2 && (
-          <WriteCommentForm onSubmit={(e) => sendComment(pageId, e)} />
-        )}
+        <WritePostForm onSubmit={(e) => sendPost(pageId, e)} />
+        <div ref={scrollBottomRef} />
       </div>
     </>
   );
