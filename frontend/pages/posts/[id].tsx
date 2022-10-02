@@ -114,7 +114,9 @@ export default function PostsId({ pageId }) {
             {repPs.map((repP, i) => (
               <li key={i}>
                 <Link href={`/accounts/${repP.sender}`}>
+                  <a>
                   {repP.sender.substring(0, 14) + "..."}
+                  </a>
                 </Link>
                 {/* TODO: we should change a tag into something good for frontend*/}
                 <a href={`/posts/${repP.pId}`}>
