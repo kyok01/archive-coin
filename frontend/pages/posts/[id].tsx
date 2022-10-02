@@ -17,12 +17,11 @@ import { CommentCard } from "components/atoms/CommentCard";
 import { PostBody } from "components/molecules/PostBody";
 import { getPostForPId } from "util/getPostForPId";
 import { getContract } from "util/getContract";
-import { getAllPosts } from "util/getAllPosts";
-import { getAllComments } from "util/getAllComments";
 import { ReplyPostList } from "components/organisms/ReplyPostList";
 import { getRepPosts } from "util/getRepPosts";
+import Link from "next/link";
 
-export default function PostsId({ pId }) {
+export default function PostsId({ pageId }) {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
   const [repCs, setRepCs] = useState([]);
@@ -38,7 +37,7 @@ export default function PostsId({ pId }) {
 
   async function getPostForPIdFunc() {
     const contract = await getContract(contractAddress, Artifact);
-    const post = await getPostForPId(pId, contract);
+    const post = await getPostForPId(pageId, contract);
     getReplyToInfo(post.replyTo);
     setPost(post);
   }
@@ -57,12 +56,11 @@ export default function PostsId({ pId }) {
   
   async function getAndSetRepPosts() {
     const contract = await getContract(contractAddress, Artifact);
-    const {repPosts, repCountArr} = await getRepPosts(pId, contract);
+    const {repPosts, repCountArr} = await getRepPosts(pageId, contract);
 
     setRepPs(repPosts);
     setRepSum(repCountArr);
   }
-
   // async function getRepComments() {
   //   const contract = await getContract(contractAddress, Artifact);
   //   const comments = await getAllComments(contract);
@@ -103,13 +101,21 @@ export default function PostsId({ pId }) {
           <ul className="list-inside" style={{ listStyle: "disc" }}>
             {repPs.map((repP, i) => (
               <li key={i}>
-                {repP.sender.substring(0, 14) + "..."}
-                <CommentCard text={repP.text} />
+                <Link href={`/accounts/${repP.sender}`}>{repP.sender.substring(0, 14) + "..."}</Link>
+                {/* TODO: we should change a tag into something good for frontend*/}
+                <a href={`/posts/${repP.pId}`} ><CommentCard text={repP.text} /></a>
                 {repSum[repP.pId] > 0 && !openPId.includes(repP.pId) && (
-                  <p className="text-left pl-2">
+                  <p className="text-left pl-2 text-primary">
                     <span
                       onClick={() => setOpenPId([...openPId, repP.pId])}
                     >{`▼ ${repSum[repP.pId]} REPLIES`}</span>
+                  </p>
+                )}
+                {repSum[repP.pId] > 0 && openPId.includes(repP.pId) && (
+                  <p className="text-left pl-2 text-primary">
+                    <span
+                      onClick={() => setOpenPId(openPId.filter((o) => o!== repP.pId))}
+                    >{`▲ CLOSE REPLIES`}</span>
                   </p>
                 )}
                 {openPId.includes(repP.pId) && <div className="ml-4"><ReplyPostList pId={repP.pId} repSum={repSum} setOpenPId={setOpenPId} openPId={openPId}/></div>}
@@ -135,9 +141,9 @@ export default function PostsId({ pId }) {
         </div>
       </div>
       <div className="mx-2">
-        {tab === 1 && <WritePostForm onSubmit={(e) => sendPost(pId, e)} />}
+        {tab === 1 && <WritePostForm onSubmit={(e) => sendPost(pageId, e)} />}
         {tab === 2 && (
-          <WriteCommentForm onSubmit={(e) => sendComment(pId, e)} />
+          <WriteCommentForm onSubmit={(e) => sendComment(pageId, e)} />
         )}
       </div>
     </>
@@ -147,5 +153,5 @@ export default function PostsId({ pId }) {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
 
-  return { props: { pId: id } };
+  return { props: { pageId: id } };
 };

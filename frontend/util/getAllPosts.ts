@@ -9,7 +9,7 @@ export async function getAllPosts(contract) {
             text: p.text,
             sender: p.sender,
             replyTo: p.replyTo.toNumber(),
-            timestamp: dateTime.toLocaleDateString()
+            timestamp: dateTime.toLocaleString()
         }
         return item;
     }));

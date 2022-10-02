@@ -24,12 +24,19 @@ export const ReplyPostList = ({ pId, repSum, setOpenPId, openPId }) => {
           {repP.sender.substring(0, 14) + "..."}
           <CommentCard text={repP.text} />
           {repSum[repP.pId] > 0 && !openPId.includes(repP.pId) && (
-            <p className="text-left pl-2">
+            <p className="text-left pl-2 text-primary">
               <span onClick={() => setOpenPId([...openPId, repP.pId])}>{`▼ ${
                 repSum[repP.pId]
               } REPLIES`}</span>
             </p>
           )}
+          {repSum[repP.pId] > 0 && openPId.includes(repP.pId) && (
+                  <p className="text-left pl-2 text-primary">
+                    <span
+                      onClick={() => setOpenPId(openPId.filter((o) => o!== repP.pId))}
+                    >{`▲ CLOSE REPLIES`}</span>
+                  </p>
+                )}
           {openPId.includes(repP.pId) && <div className="ml-4"><ReplyPostList pId={repP.pId} repSum={repSum} setOpenPId={setOpenPId} openPId={openPId} /></div>}
           {/* <ReplyPostList  /> */}
         </li>

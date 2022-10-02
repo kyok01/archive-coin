@@ -47,7 +47,7 @@ export default function PostsIndex() {
                     : p.text
                 }
                 sender={p.sender.substring(0, 14) + "..."}
-                timestamp={p.timestamp}
+                timestamp={p.timestamp.slice(0,-3)}
                 status={`${repSum[p.pId]} Rep`}
               />
             </div>
