@@ -40,6 +40,9 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         uri = _uri;
     }
 
+    /**
+     * @dev functions about mint
+     */
     function safeMint() public payable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
 
@@ -49,7 +52,9 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, uri);
     }
 
-    // fuction about chat
+    /**
+     * @dev functions about message
+     */
     function sendValidatedMessage(string memory message) public {
         if (msg.sender != creator) {
             require(balanceOf(msg.sender) >= 1, "You do not have nft");
@@ -88,7 +93,9 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         return messages;
     }
 
-    // functions about price
+    /**
+     * @dev functions about price
+     */
     function getPrice() public view returns (uint256) {
         return mintPrice;
     }
@@ -101,7 +108,9 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         mintPrice = _price;
     }
 
-    // functions about creator
+    /**
+     * @dev functions about creator
+     */
     function getCreator() public view returns (address) {
         return creator;
     }
@@ -114,7 +123,20 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         creator = _creator;
     }
 
-    // The following functions are overrides required by Solidity.
+    /**
+     * @dev functions about withdrawing
+     */
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    /**
+     * @dev The following functions are overrides required by Solidity.
+     */
     function _burn(uint256 tokenId)
         internal
         override(ERC721, ERC721URIStorage)

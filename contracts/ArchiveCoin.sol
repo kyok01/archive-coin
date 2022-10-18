@@ -6,9 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 import {MyToken} from "./NftContract.sol";
 
-contract DockHackDiary is
-    Ownable
-{
+contract DockHackDiary is Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
     uint256 private _fee;
@@ -28,7 +26,9 @@ contract DockHackDiary is
         _fee = 0.0001 ether;
     }
 
-    // functions about post
+    /**
+     * @dev functions about post
+     */
     function setPost(
         string memory title,
         string memory text,
@@ -37,7 +37,13 @@ contract DockHackDiary is
         _pIdCounter.increment();
         uint256 pId = _pIdCounter.current();
 
-        Post memory _post = Post(msg.sender, title, text, replyTo, block.timestamp);
+        Post memory _post = Post(
+            msg.sender,
+            title,
+            text,
+            replyTo,
+            block.timestamp
+        );
         pIdToPost[pId] = _post;
     }
 
@@ -51,36 +57,58 @@ contract DockHackDiary is
 
         Post[] memory posts = new Post[](totalPostCount);
         for (uint256 i = 0; i < totalPostCount; i++) {
-            posts[currentIndex] = pIdToPost[i+1];
+            posts[currentIndex] = pIdToPost[i + 1];
             currentIndex += 1;
         }
         return posts;
     }
 
-    // create NFT Contract
-    function createNftContract(uint256 mintPrice, string memory uri) public payable{
+    /**
+     * @dev create NFT Contract
+     */
+    function createNftContract(uint256 mintPrice, string memory uri)
+        public
+        payable
+    {
         require(msg.value == _fee, "msg value is incorrect");
         MyToken mytoken = new MyToken(mintPrice, msg.sender, uri);
         address myTokenAddress = address(mytoken);
         setEoaToContract(myTokenAddress);
     }
 
-    // functions about eoaToContract
-    function getEoaToContract(address e) public view returns(address){
+    /**
+     * @dev functions about eoaToContract
+     */
+    function getEoaToContract(address e) public view returns (address) {
         return eoaToContract[e];
     }
 
-    // TODO: msg.sender must be address c creator
+    /**
+     * @dev functions about withdrawing
+     */
     function setEoaToContract(address c) public {
         eoaToContract[msg.sender] = c;
     }
 
-    // functions about fee
-    function getFee() public view returns(uint256){
+    /**
+     * @dev functions about fee
+     */
+    function getFee() public view returns (uint256) {
         return _fee;
     }
 
     function setFee(uint256 newFee) public onlyOwner {
         _fee = newFee;
+    }
+
+    /**
+     * @dev functions about withdrawing
+     */
+    fallback() external payable {}
+
+    receive() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 }

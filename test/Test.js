@@ -14,7 +14,7 @@ describe("Archive Coin", function () {
 
     // Nft Contract
     const NC = await ethers.getContractFactory("MyToken");
-    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"), owner.address);
+    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"), owner.address, "https://example.com");
 
     await Contract2.deployed();
 
@@ -44,7 +44,7 @@ describe("Archive Coin", function () {
     );
 
     const token = await Contract.createNftContract(
-      ethers.utils.parseEther("0.0001"),
+      ethers.utils.parseEther("0.0001"),"https://tokenUriExample.com",
       { value: ethers.utils.parseEther("0.0001") }
     );
     const result = await ethers.provider
@@ -65,7 +65,7 @@ describe("Archive Coin", function () {
     }
     Contract.setFee(ethers.utils.parseEther("0.00001"));
     await expect(
-      Contract.createNftContract(ethers.utils.parseEther("0.0001"), {
+      Contract.createNftContract(ethers.utils.parseEther("0.0001"), "https://tokenUriExample.com", {
         value: ethers.utils.parseEther("0.0001"),
       })
     ).to.be.revertedWith("msg value is incorrect");
@@ -78,7 +78,7 @@ describe("Archive Coin", function () {
 
     await Contract2.sendValidatedMessage("aaa");
     await Contract2.connect(owner).sendValidatedMessage("aaa");
-    await Contract2.connect(addr1).safeMint("aaa", {
+    await Contract2.connect(addr1).safeMint({
       value: ethers.utils.parseEther("0.0001"),
     });
     await Contract2.connect(addr1).sendValidatedMessage("aaa");
