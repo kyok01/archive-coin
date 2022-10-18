@@ -58,9 +58,9 @@ contract DockHackDiary is
     }
 
     // create NFT Contract
-    function createNftContract(uint256 mintPrice) public payable{
+    function createNftContract(uint256 mintPrice, string memory uri) public payable{
         require(msg.value == _fee, "msg value is incorrect");
-        MyToken mytoken = new MyToken(mintPrice, msg.sender);
+        MyToken mytoken = new MyToken(mintPrice, msg.sender, uri);
         address myTokenAddress = address(mytoken);
         setEoaToContract(myTokenAddress);
     }
