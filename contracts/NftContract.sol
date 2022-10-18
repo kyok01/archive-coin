@@ -6,11 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-import "hardhat/console.sol"; // TODO:must delete
-
 contract MyToken is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     uint256 private mintPrice;
+    string private uri;
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _messageIdCounter;
@@ -31,12 +30,20 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
 
     address creator;
 
-    constructor(uint256 _price, address _creator) ERC721("MyToken", "MTK") {
+    constructor(
+        uint256 _price,
+        address _creator,
+        string memory _uri
+    ) ERC721("MyToken", "MTK") {
         mintPrice = _price;
-        creator = _creator; // not owner. owner = archive coin contract
+        creator = _creator; // not owner. owner = DockHackDiary contract
+        uri = _uri;
     }
 
-    function safeMint(string memory uri) public payable {
+    /**
+     * @dev functions about mint
+     */
+    function safeMint() public payable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
 
         uint256 tokenId = _tokenIdCounter.current();
@@ -45,7 +52,9 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(tokenId, uri);
     }
 
-    // fuction about chat
+    /**
+     * @dev functions about message
+     */
     function sendValidatedMessage(string memory message) public {
         if (msg.sender != creator) {
             require(balanceOf(msg.sender) >= 1, "You do not have nft");
@@ -84,27 +93,50 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         return messages;
     }
 
-    // functions about price
+    /**
+     * @dev functions about price
+     */
     function getPrice() public view returns (uint256) {
         return mintPrice;
     }
 
     function setPrice(uint256 _price) public {
-        require(msg.sender == creator, "you are not the creator of this contract");
-       mintPrice = _price;
+        require(
+            msg.sender == creator,
+            "you are not the creator of this contract"
+        );
+        mintPrice = _price;
     }
 
+    /**
+     * @dev functions about creator
+     */
     function getCreator() public view returns (address) {
         return creator;
     }
 
     function setCreator(address _creator) public {
-        require(msg.sender == creator, "you are not the creator of this contract");
+        require(
+            msg.sender == creator,
+            "you are not the creator of this contract"
+        );
         creator = _creator;
     }
 
-    // The following functions are overrides required by Solidity.
+    /**
+     * @dev functions about withdrawing
+     */
+    fallback() external payable {}
 
+    receive() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    /**
+     * @dev The following functions are overrides required by Solidity.
+     */
     function _burn(uint256 tokenId)
         internal
         override(ERC721, ERC721URIStorage)
