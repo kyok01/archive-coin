@@ -53,7 +53,11 @@ describe("Archive Coin", function () {
         logs(transactionReceipt);
       });
 
+    const aaa = await token.wait();
+    console.log(aaa);
+
     function logs(transactionReceipt) {
+      console.log(transactionReceipt.logs);
       console.log("//");
       console.log(transactionReceipt.logs[0]);
       console.log("////////");
@@ -84,7 +88,7 @@ describe("Archive Coin", function () {
 
     await expect(Contract2.ownerOf(1) == owner.address);
     await expect(Contract2.ownerOf(2) == addr2.address);
-    console.log(await Contract2.getAllMessages());
+    // console.log(await Contract2.getAllMessages());
   });
 
   it("map eoaToContract", async function () {

@@ -29,7 +29,6 @@ contract DockHackDiary is
     }
 
     // functions about post
-
     function setPost(
         string memory title,
         string memory text,
@@ -59,9 +58,11 @@ contract DockHackDiary is
     }
 
     // create NFT Contract
-    function createNftContract(uint256 mintPrice) public payable returns (MyToken){
+    function createNftContract(uint256 mintPrice) public payable{
         require(msg.value == _fee, "msg value is incorrect");
-        return new MyToken(mintPrice, msg.sender);
+        MyToken mytoken = new MyToken(mintPrice, msg.sender);
+        address myTokenAddress = address(mytoken);
+        setEoaToContract(myTokenAddress);
     }
 
     // functions about eoaToContract
