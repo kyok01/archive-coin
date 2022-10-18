@@ -11,13 +11,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 import {MyToken} from "./NftContract.sol";
 
-contract ArchiveCoin is
-    ERC20,
-    ERC20Burnable,
-    ERC20Snapshot,
-    Ownable,
-    ERC20Permit,
-    ERC20Votes
+contract DockHackDiary is
+    Ownable
 {
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
@@ -50,18 +45,8 @@ contract ArchiveCoin is
     mapping(uint256 => Comment) cIdToComment;
     mapping(address => address) eoaToContract;
 
-    constructor() ERC20("Archive Coin", "ARCV ") ERC20Permit("Archive Coin") {
-        _randomRange = 2;
-        _reward = 1;
-        limitPerH = 30;
-        // _price = 100000000000000;
+    constructor() {
         _fee = 0.0001 ether;
-    }
-
-    // functions about Token
-
-    function snapshot() public onlyOwner {
-        _snapshot();
     }
 
     // functions about post
@@ -76,7 +61,6 @@ contract ArchiveCoin is
 
         Post memory _post = Post(msg.sender, title, text, replyTo, block.timestamp);
         pIdToPost[pId] = _post;
-        _randomMint(msg.sender);
     }
 
     function getPostForPId(uint256 pId) public view returns (Post memory) {
@@ -149,79 +133,5 @@ contract ArchiveCoin is
 
     function setFee(uint256 newFee) public onlyOwner {
         _fee = newFee;
-    }
-
-    // function about randomness
-    function _randomMint(address to) private {
-        if (_random() == 1) {
-            _mint(to, _reward);
-        }
-    }
-
-    function setRange(uint256 num) public onlyOwner {
-        _randomRange = num;
-    }
-
-    function getRange() public view returns (uint256) {
-        return _randomRange;
-    }
-
-    // internal function
-    function _random() private view returns (uint) {
-        // sha3 and now have been deprecated
-        return
-            uint(
-                keccak256(
-                    abi.encodePacked(
-                        block.difficulty,
-                        block.timestamp,
-                        _pIdCounter.current(),
-                        _cIdCounter.current()
-                    )
-                )
-            ) % _randomRange;
-        // convert hash to integer
-        // players is an array of entrants
-    }
-
-    // function about amount
-    function setAmount(uint256 num) public onlyOwner {
-        _reward = num;
-    }
-
-    function getAmount() public view returns (uint256) {
-        return _reward;
-    }
-
-    // The following functions are overrides required by Solidity.
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Snapshot) {
-        super._beforeTokenTransfer(from, to, amount);
-    }
-
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20, ERC20Votes) {
-        super._afterTokenTransfer(from, to, amount);
-    }
-
-    function _mint(address to, uint256 amount)
-        internal
-        override(ERC20, ERC20Votes)
-    {
-        super._mint(to, amount);
-    }
-
-    function _burn(address account, uint256 amount)
-        internal
-        override(ERC20, ERC20Votes)
-    {
-        super._burn(account, amount);
     }
 }

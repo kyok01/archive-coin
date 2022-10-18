@@ -5,7 +5,7 @@ const { ethers } = require("hardhat");
 describe("Archive Coin", function () {
   async function deployTokenFixture() {
     // ArchiveCoin Contract
-    const ARCV = await ethers.getContractFactory("ArchiveCoin");
+    const ARCV = await ethers.getContractFactory("DockHackDiary");
     const [owner, addr1, addr2] = await ethers.getSigners();
 
     const Contract = await ARCV.deploy();
@@ -30,16 +30,10 @@ describe("Archive Coin", function () {
     console.dir("addr1=" + addr1Balance);
 
     await Contract.setPost("title", "text", 0);
-    let ownerBalance = await Contract.balanceOf(owner.address);
-    console.dir("owner=" + ownerBalance);
 
     await Contract.connect(addr1).setPost("title:re", "text:re", 1);
-    // let ownerBalance = await ethers.provider.getBalance(owner.address);
-    addr1Balance = await Contract.balanceOf(addr1.address);
-    console.dir("addr1=" + addr1Balance);
 
     let allPost = await Contract.getAllPosts();
-    // console.log(allPost[0]);
 
     expect(allPost[1]).to.deep.equal(await Contract.getPostForPId(2));
   });
@@ -53,15 +47,10 @@ describe("Archive Coin", function () {
     console.dir("addr1=" + addr1Balance);
 
     await Contract.setPost("title", "text", 0);
-    let ownerBalance = await Contract.balanceOf(owner.address);
-    console.dir("owner=" + ownerBalance);
 
     await Contract.connect(addr1).setComment("text:re", 1);
-    addr1Balance = await Contract.balanceOf(addr1.address);
-    console.dir("addr1=" + addr1Balance);
 
     let allComments = await Contract.getAllComments();
-    // console.log(allPost[0]);
 
     expect(allComments[0]).to.deep.equal(await Contract.getCommentForCId(1));
   });
