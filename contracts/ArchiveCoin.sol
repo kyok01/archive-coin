@@ -11,15 +11,7 @@ contract DockHackDiary is
 {
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
-    Counters.Counter private _cIdCounter;
-    uint256 private _randomRange;
-    uint256 private _reward;
     uint256 private _fee;
-
-    /**
-     * TODO: write private function about the number of mint within one hour. 
-     */
-    uint256 private limitPerH; 
 
     struct Post {
         address sender;
@@ -29,15 +21,7 @@ contract DockHackDiary is
         uint timestamp;
     }
 
-    struct Comment {
-        address sender;
-        string text;
-        uint256 replyTo;
-        uint timestamp;
-    }
-
     mapping(uint256 => Post) pIdToPost;
-    mapping(uint256 => Comment) cIdToComment;
     mapping(address => address) eoaToContract;
 
     constructor() {
@@ -72,37 +56,6 @@ contract DockHackDiary is
             currentIndex += 1;
         }
         return posts;
-    }
-
-    function setComment(
-        string memory text,
-        uint256 replyTo
-    ) public {
-        uint256 cId = _cIdCounter.current();
-        _cIdCounter.increment();
-
-        Comment memory _comment = Comment(msg.sender, text, replyTo, block.timestamp);
-        cIdToComment[cId] = _comment;
-    }
-
-    function getCommentForCId(uint256 cId)
-        public
-        view
-        returns (Comment memory)
-    {
-        return cIdToComment[cId];
-    }
-
-    function getAllComments() public view returns (Comment[] memory) {
-        uint256 totalCommentCount = _cIdCounter.current();
-        uint256 currentIndex = 0;
-
-        Comment[] memory comments = new Comment[](totalCommentCount);
-        for (uint256 i = 0; i < totalCommentCount; i++) {
-            comments[currentIndex] = cIdToComment[i+1];
-            currentIndex += 1;
-        }
-        return comments;
     }
 
     // create NFT Contract

@@ -38,23 +38,6 @@ describe("Archive Coin", function () {
     expect(allPost[1]).to.deep.equal(await Contract.getPostForPId(2));
   });
 
-  it("Comments", async function () {
-    const { Contract, owner, addr1, addr2 } = await loadFixture(
-      deployTokenFixture
-    );
-
-    let addr1Balance = await ethers.provider.getBalance(addr1.address);
-    console.dir("addr1=" + addr1Balance);
-
-    await Contract.setPost("title", "text", 0);
-
-    await Contract.connect(addr1).setComment("text:re", 1);
-
-    let allComments = await Contract.getAllComments();
-
-    expect(allComments[0]).to.deep.equal(await Contract.getCommentForCId(1));
-  });
-
   it("CreateNftContract", async function () {
     const { Contract, owner, addr1, addr2 } = await loadFixture(
       deployTokenFixture
