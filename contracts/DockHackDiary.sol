@@ -101,7 +101,9 @@ contract DockHackDiary is Ownable, IDockHackDiary {
 
     receive() external payable {}
 
-    function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    function withdraw(uint256 amount, address recipient) public onlyOwner {
+        require(amount <= address(this).balance, "Your requesting amount is over treasury.");
+        payable(recipient).transfer(amount);
+        emit HasWithdrawn(amount, recipient, address(this).balance);
     }
 }

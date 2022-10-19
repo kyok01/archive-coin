@@ -11,6 +11,8 @@ interface IDockHackDiary {
         uint timestamp;
     }
 
+    event HasWithdrawn(uint256 amount, address recipient, uint256 balance);
+
     function setPost(
         string memory title,
         string memory text,
@@ -49,5 +51,5 @@ interface IDockHackDiary {
      * @dev functions about withdrawing
      */
 
-    function withdraw() external;
+    function withdraw(uint256 amount, address recipient) external;
 }
