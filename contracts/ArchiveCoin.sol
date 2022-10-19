@@ -66,12 +66,12 @@ contract DockHackDiary is Ownable {
     /**
      * @dev create NFT Contract
      */
-    function createNftContract(uint256 mintPrice, string memory uri)
+    function createNftContract(uint256 mintPrice, uint256 maxSupply, string memory uri)
         public
         payable
     {
         require(msg.value == _fee, "msg value is incorrect");
-        MyToken mytoken = new MyToken(mintPrice, msg.sender, uri);
+        MyToken mytoken = new MyToken(mintPrice, maxSupply, msg.sender, uri);
         address myTokenAddress = address(mytoken);
         setEoaToContract(myTokenAddress);
     }

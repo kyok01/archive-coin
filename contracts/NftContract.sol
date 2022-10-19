@@ -10,6 +10,7 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     uint256 private mintPrice;
     string private uri;
+    uint256 private maxSupply;
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _messageIdCounter;
@@ -32,10 +33,12 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
 
     constructor(
         uint256 _price,
+        uint256 _maxSupply,
         address _creator,
         string memory _uri
     ) ERC721("MyToken", "MTK") {
         mintPrice = _price;
+        maxSupply = _maxSupply;
         creator = _creator; // not owner. owner = DockHackDiary contract
         uri = _uri;
     }
@@ -47,7 +50,12 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
 
         uint256 tokenId = _tokenIdCounter.current();
+        require(
+            tokenId <= maxSupply,
+            "The number of minted NFT has reached max supply"
+        );
         _tokenIdCounter.increment();
+
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
     }
@@ -106,6 +114,21 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
             "you are not the creator of this contract"
         );
         mintPrice = _price;
+    }
+
+    /**
+     * @dev functions about maxSupply
+     */
+    function getMaxSupply() public view returns (uint256) {
+        return maxSupply;
+    }
+
+    function setMaxSupply(uint256 _maxSupply) public {
+        require(
+            msg.sender == creator,
+            "you are not the creator of this contract"
+        );
+        maxSupply = _maxSupply;
     }
 
     /**
