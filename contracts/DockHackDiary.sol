@@ -5,19 +5,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import {MyToken} from "./NftContract.sol";
+import {IDockHackDiary} from "./interface/IDockHackDiary.sol";
 
-contract DockHackDiary is Ownable {
+contract DockHackDiary is Ownable, IDockHackDiary {
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
     uint256 private _fee;
-
-    struct Post {
-        address sender;
-        string title;
-        string text;
-        uint256 replyTo;
-        uint timestamp;
-    }
 
     mapping(uint256 => Post) pIdToPost;
     mapping(address => address) eoaToContract;
