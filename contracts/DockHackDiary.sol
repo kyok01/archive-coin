@@ -5,19 +5,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import {MyToken} from "./NftContract.sol";
+import {IDockHackDiary} from "./interfaces/IDockHackDiary.sol";
 
-contract DockHackDiary is Ownable {
+contract DockHackDiary is Ownable, IDockHackDiary {
     using Counters for Counters.Counter;
     Counters.Counter private _pIdCounter;
     uint256 private _fee;
-
-    struct Post {
-        address sender;
-        string title;
-        string text;
-        uint256 replyTo;
-        uint timestamp;
-    }
 
     mapping(uint256 => Post) pIdToPost;
     mapping(address => address) eoaToContract;
@@ -66,12 +59,12 @@ contract DockHackDiary is Ownable {
     /**
      * @dev create NFT Contract
      */
-    function createNftContract(uint256 mintPrice, string memory uri)
+    function createNftContract(uint256 mintPrice, uint256 maxSupply, string memory uri)
         public
         payable
     {
         require(msg.value == _fee, "msg value is incorrect");
-        MyToken mytoken = new MyToken(mintPrice, msg.sender, uri);
+        MyToken mytoken = new MyToken(mintPrice, maxSupply, msg.sender, uri);
         address myTokenAddress = address(mytoken);
         setEoaToContract(myTokenAddress);
     }
@@ -108,7 +101,9 @@ contract DockHackDiary is Ownable {
 
     receive() external payable {}
 
-    function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    function withdraw(uint256 amount, address recipient) public onlyOwner {
+        require(amount <= address(this).balance, "Your requesting amount is over treasury.");
+        payable(recipient).transfer(amount);
+        emit HasWithdrawn(amount, recipient, address(this).balance);
     }
 }

@@ -14,7 +14,12 @@ describe("Archive Coin", function () {
 
     // Nft Contract
     const NC = await ethers.getContractFactory("MyToken");
-    const Contract2 = await NC.deploy(ethers.utils.parseEther("0.0001"), owner.address, "https://example.com");
+    const Contract2 = await NC.deploy(
+      ethers.utils.parseEther("0.0001"),
+      10,
+      owner.address,
+      "https://example.com"
+    );
 
     await Contract2.deployed();
 
@@ -43,8 +48,12 @@ describe("Archive Coin", function () {
       deployTokenFixture
     );
 
+    let nftAddress;
+
     const token = await Contract.createNftContract(
-      ethers.utils.parseEther("0.0001"),"https://tokenUriExample.com",
+      ethers.utils.parseEther("0.0001"),
+      10,
+      "https://tokenUriExample.com",
       { value: ethers.utils.parseEther("0.0001") }
     );
     const result = await ethers.provider
@@ -53,22 +62,41 @@ describe("Archive Coin", function () {
         logs(transactionReceipt);
       });
 
-    const aaa = await token.wait();
-    console.log(aaa);
+    const transactionResult = await token.wait();
+    console.log(transactionResult);
 
     function logs(transactionReceipt) {
-      console.log(transactionReceipt.logs);
-      console.log("//");
-      console.log(transactionReceipt.logs[0]);
-      console.log("////////");
-      console.log(transactionReceipt.logs[0].address);
+      console.log(
+        "Created contract address is " + transactionReceipt.logs[0].address
+      );
+      nftAddress = transactionReceipt.logs[0].address;
     }
+
+    expect(await Contract.getEoaToContract(owner.address)).to.be.equal(
+      nftAddress
+    );
+
     Contract.setFee(ethers.utils.parseEther("0.00001"));
     await expect(
-      Contract.createNftContract(ethers.utils.parseEther("0.0001"), "https://tokenUriExample.com", {
-        value: ethers.utils.parseEther("0.0001"),
-      })
+      Contract.createNftContract(
+        ethers.utils.parseEther("0.0001"),
+        10,
+        "https://tokenUriExample.com",
+        {
+          value: ethers.utils.parseEther("0.0001"),
+        }
+      )
     ).to.be.revertedWith("msg value is incorrect");
+
+    await expect(
+      Contract.withdraw(ethers.utils.parseEther("0.00006"), owner.address)
+    )
+      .to.emit(Contract, "HasWithdrawn")
+      .withArgs(
+        ethers.utils.parseEther("0.00006"),
+        owner.address,
+        ethers.utils.parseEther("0.00004")
+      );
   });
 
   it("NftContract", async function () {
@@ -98,7 +126,9 @@ describe("Archive Coin", function () {
 
     await Contract.setEoaToContract(Contract2.address);
     console.log(await Contract.getEoaToContract(owner.address));
-    expect(Contract2.address).to.equal(await Contract.getEoaToContract(owner.address))
+    expect(Contract2.address).to.equal(
+      await Contract.getEoaToContract(owner.address)
+    );
   });
 
   it("creator", async function () {

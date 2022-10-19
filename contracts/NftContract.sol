@@ -6,36 +6,29 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract MyToken is ERC721, ERC721URIStorage, Ownable {
+import {IMyToken} from "./interfaces/IMyToken.sol";
+
+contract MyToken is ERC721, ERC721URIStorage, Ownable, IMyToken {
     using Counters for Counters.Counter;
     uint256 private mintPrice;
     string private uri;
+    uint256 private maxSupply;
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _messageIdCounter;
 
-    struct Message {
-        address from;
-        string message;
-        uint timestamp;
-    }
-
     mapping(uint256 => Message) private messagesList;
-
-    event sendMessageEvent(
-        uint indexed _id,
-        address indexed _from,
-        string _message
-    );
 
     address creator;
 
     constructor(
         uint256 _price,
+        uint256 _maxSupply,
         address _creator,
         string memory _uri
     ) ERC721("MyToken", "MTK") {
         mintPrice = _price;
+        maxSupply = _maxSupply;
         creator = _creator; // not owner. owner = DockHackDiary contract
         uri = _uri;
     }
@@ -47,7 +40,12 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
 
         uint256 tokenId = _tokenIdCounter.current();
+        require(
+            tokenId <= maxSupply,
+            "The number of minted NFT has reached max supply"
+        );
         _tokenIdCounter.increment();
+
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
     }
@@ -109,6 +107,21 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
     }
 
     /**
+     * @dev functions about maxSupply
+     */
+    function getMaxSupply() public view returns (uint256) {
+        return maxSupply;
+    }
+
+    function setMaxSupply(uint256 _maxSupply) public {
+        require(
+            msg.sender == creator,
+            "you are not the creator of this contract"
+        );
+        maxSupply = _maxSupply;
+    }
+
+    /**
      * @dev functions about creator
      */
     function getCreator() public view returns (address) {
@@ -130,8 +143,10 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable {
 
     receive() external payable {}
 
-    function withdraw() public onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    function withdraw(uint256 amount, address recipient) public onlyOwner {
+        require(amount <= address(this).balance, "Your requesting amount is over treasury.");
+        payable(recipient).transfer(amount);
+        emit HasWithdrawn(amount, recipient, address(this).balance);
     }
 
     /**
