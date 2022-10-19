@@ -9,7 +9,7 @@ const path = require("path");
 
 
 async function main() {
-  const ContractFactory = await ethers.getContractFactory("ArchiveCoin");
+  const ContractFactory = await ethers.getContractFactory("DockHackDiary");
 
   // Start deployment, returning a promise that resolves to a contract object
   const Contract = await ContractFactory.deploy();   
@@ -32,7 +32,7 @@ function saveFrontendFiles(contract) {
     JSON.stringify({ address: contract.address }, undefined, 2)
   );
 
-  const Artifact = artifacts.readArtifactSync("ArchiveCoin");
+  const Artifact = artifacts.readArtifactSync("DockHackDiary");
 
   fs.writeFileSync(
     path.join(contractsDir, "ArchiveCoin.json"),
