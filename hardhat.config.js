@@ -24,6 +24,9 @@ module.exports = {
       url: API_URL,
       accounts: [`0x${PRIVATE_KEY}`],
     },
+    localhost: {
+      url: "http://127.0.0.1:8545"
+    },
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
