@@ -6,12 +6,27 @@ export const CreateContractForm = ({ onSubmit }) => {
     <form onSubmit={onSubmit}>
       <div className="flex flex-col justify-center items-center">
         <InputWithLabels
-          text="mint price"
+          text="mint price(ether)"
           type="text"
           name="mintPrice"
           placeholder="price"
           AltLabel1="*"
-          AltLabel3="ether"
+          required={true}
+        />
+        <InputWithLabels
+          text="max supply"
+          type="number"
+          name="maxSupply"
+          placeholder="amount"
+          AltLabel1="*"
+          required={true}
+        />
+        <InputWithLabels
+          text="Token URI"
+          type="text"
+          name="tokenUri"
+          placeholder="ex. ipfs://xxx"
+          AltLabel1="*"
           required={true}
         />
       </div>
