@@ -1,6 +1,5 @@
 /* eslint import/order: 0, import/no-unresolved: 0 */
 import { H1 } from "components/atoms/H1";
-import { TextareaWithLabels } from "components/molecules/TextareaWithLabels";
 import { Navbar } from "components/organisms/NavBar";
 import { WritePostForm } from "components/organisms/WritePostForm";
 import { sendPost } from "util/sendPost";

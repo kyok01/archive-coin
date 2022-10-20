@@ -3,16 +3,13 @@ import { GetServerSideProps } from "next";
 import ArtifactOfA from "@cont/ArchiveCoin.json";
 import ArtifactOfN from "@cont/NftContract.json";
 import contractAddress from "@cont/contract-address.json";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { PrimaryBtn } from "components/atoms/PrimaryBtn";
 import { Navbar } from "components/organisms/NavBar";
-import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 
 import { getContract } from "util/getContract";
 import { H1 } from "components/atoms/H1";
 import { ProfileTab } from "components/organisms/ProfileTab";
-import Image from "next/image";
 import { ChatRoomTitle } from "components/organisms/ChatRoomTitle";
 import { Message } from "components/atoms/Message";
 import { getSigner } from "util/getSigner";

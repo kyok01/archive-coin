@@ -7,12 +7,8 @@ import contractAddress from "@cont/contract-address.json";
 import { useState, useEffect, useRef } from "react";
 import { postType } from "types/postType";
 import { Navbar } from "components/organisms/NavBar";
-import { filter } from "util/filterArr";
 import { WritePostForm } from "components/organisms/WritePostForm";
 import { sendPost } from "util/sendPost";
-import { sendComment } from "util/sendComment";
-import { WriteCommentForm } from "components/organisms/WriteCommentForm";
-import { SimpleCard } from "components/atoms/SimpleCard";
 import { CommentCard } from "components/atoms/CommentCard";
 import { PostBody } from "components/molecules/PostBody";
 import { getPostForPId } from "util/getPostForPId";
@@ -26,7 +22,6 @@ import { H2 } from "components/atoms/H2";
 export default function PostsId({ pageId }) {
   const [post, setPost] = useState<postType>({});
   const [repPs, setRepPs] = useState([]);
-  const [repCs, setRepCs] = useState([]);
   const [reTitle, setReT] = useState<string>("");
   const [repSum, setRepSum] = useState([]);
   const [openPId, setOpenPId] = useState([]);
@@ -52,7 +47,6 @@ export default function PostsId({ pageId }) {
 
   async function getReplies() {
     await getAndSetRepPosts();
-    // await getRepComments();
   }
 
   async function getAndSetRepPosts() {
@@ -62,18 +56,6 @@ export default function PostsId({ pageId }) {
     setRepPs(repPosts);
     setRepSum(repCountArr);
   }
-  // async function getRepComments() {
-  //   const contract = await getContract(contractAddress, Artifact);
-  //   const comments = await getAllComments(contract);
-
-  //   const repComments = await filter(comments, async (c, i) => {
-  //     const bool = c.replyTo == pId;
-  //     console.log(bool);
-  //     return bool;
-  //   });
-
-  //   setRepCs(repComments);
-  // }
 
   function scrollIntoBottom() {
     scrollBottomRef?.current?.scrollIntoView();

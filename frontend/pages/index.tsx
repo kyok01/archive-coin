@@ -8,13 +8,11 @@ import { getContract } from "util/getContract";
 import styles from "../styles/Home.module.css";
 import Artifact from "@cont/ArchiveCoin.json";
 import contractAddress from "@cont/contract-address.json";
-import { ethers } from "ethers";
 import { HeroWithFigure } from "components/organisms/HeroWithFigure";
 import { useEffect, useState } from "react";
 import { getAllPosts } from "util/getAllPosts";
 import Link from "next/link";
 import { SimpleCard } from "components/atoms/SimpleCard";
-import { H2 } from "components/atoms/H2";
 
 const Home: NextPage = () => {
   const [posts, setPosts] = useState([]);
