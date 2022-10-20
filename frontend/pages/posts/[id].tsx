@@ -52,7 +52,6 @@ export default function PostsId({ pageId }) {
 
   async function getReplies() {
     await getAndSetRepPosts();
-    // await getRepComments();
   }
 
   async function getAndSetRepPosts() {
@@ -62,18 +61,6 @@ export default function PostsId({ pageId }) {
     setRepPs(repPosts);
     setRepSum(repCountArr);
   }
-  // async function getRepComments() {
-  //   const contract = await getContract(contractAddress, Artifact);
-  //   const comments = await getAllComments(contract);
-
-  //   const repComments = await filter(comments, async (c, i) => {
-  //     const bool = c.replyTo == pId;
-  //     console.log(bool);
-  //     return bool;
-  //   });
-
-  //   setRepCs(repComments);
-  // }
 
   function scrollIntoBottom() {
     scrollBottomRef?.current?.scrollIntoView();
