@@ -60,7 +60,6 @@ export default function MintNftPage({ pId }) {
     );
     const price = await contract.getPrice();
     const transaction = await contract.safeMint(
-      "https://gateway.pinata.cloud/ipfs/Qmaf2uy3q2orbSmNmUjwmniUh86zUKT3u6JjbmdZapqUMZ",
       { value: price }
     );
     await transaction.wait();
