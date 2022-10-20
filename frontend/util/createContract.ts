@@ -18,8 +18,10 @@ export const createNftContract = async(fee, event) => {
         );
         
       const mintPrice = event.target.mintPrice.value;
+      const maxSupply = event.target.maxSupply.value;
+      const tokenUri = event.target.tokenUri.value;
      
-      let transaction = await contract.createNftContract(ethers.utils.parseEther(mintPrice), {
+      let transaction = await contract.createNftContract(ethers.utils.parseEther(mintPrice), maxSupply, tokenUri, {
         value: ethers.utils.parseEther(fee),
       });
       await transaction.wait()
