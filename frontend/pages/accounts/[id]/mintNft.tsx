@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 
 import { PrimaryBtn } from "components/atoms/PrimaryBtn";
 import { Navbar } from "components/organisms/NavBar";
-import { WriteCommentForm } from "components/organisms/WriteCommentForm";
 
 import { getContract } from "util/getContract";
 import { H1 } from "components/atoms/H1";
