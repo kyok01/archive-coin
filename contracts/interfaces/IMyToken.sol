@@ -52,6 +52,11 @@ interface IMyToken {
     function setCreator(address _creator) external;
 
     /**
+     * @dev functions about counter
+     */
+    function getCurrentTokenId() external view returns(uint256);
+
+    /**
      * @dev functions about withdrawing
      */
 

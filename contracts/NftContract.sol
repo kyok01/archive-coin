@@ -39,12 +39,12 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable, IMyToken {
     function safeMint() public payable {
         require(msg.value == mintPrice, "Your msg value is incorrect");
 
+        _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
         require(
             tokenId <= maxSupply,
             "The number of minted NFT has reached max supply"
         );
-        _tokenIdCounter.increment();
 
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
@@ -137,6 +137,13 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable, IMyToken {
     }
 
     /**
+     * @dev functions about counter
+     */
+    function getCurrentTokenId() external view returns(uint256){
+        return _tokenIdCounter.current();
+    }
+
+    /**
      * @dev functions about withdrawing
      */
     fallback() external payable {}
@@ -144,7 +151,10 @@ contract MyToken is ERC721, ERC721URIStorage, Ownable, IMyToken {
     receive() external payable {}
 
     function withdraw(uint256 amount, address recipient) public onlyOwner {
-        require(amount <= address(this).balance, "Your requesting amount is over treasury.");
+        require(
+            amount <= address(this).balance,
+            "Your requesting amount is over treasury."
+        );
         payable(recipient).transfer(amount);
         emit HasWithdrawn(amount, recipient, address(this).balance);
     }
