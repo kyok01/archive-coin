@@ -16,7 +16,7 @@ describe("Archive Coin", function () {
     const NC = await ethers.getContractFactory("MyToken");
     const Contract2 = await NC.deploy(
       ethers.utils.parseEther("0.0001"),
-      10,
+      2,
       owner.address,
       "https://example.com"
     );
@@ -117,6 +117,33 @@ describe("Archive Coin", function () {
     await expect(Contract2.ownerOf(1) == owner.address);
     await expect(Contract2.ownerOf(2) == addr2.address);
     // console.log(await Contract2.getAllMessages());
+  });
+
+  it("Mint a lot", async function () {
+    const { Contract, Contract2, owner, addr1, addr2 } = await loadFixture(
+      deployTokenFixture
+    );
+
+    await Contract2.connect(addr1).safeMint({
+      value: ethers.utils.parseEther("0.0001"),
+    });
+    await Contract2.connect(addr1).safeMint({
+      value: ethers.utils.parseEther("0.0001"),
+    });
+
+    await expect(
+      Contract2.connect(addr1).safeMint({
+        value: ethers.utils.parseEther("0.0001"),
+      })
+    ).to.be.revertedWith("The number of minted NFT has reached max supply");
+
+    await expect(
+      Contract2.connect(addr1).safeMint({
+        value: ethers.utils.parseEther("0.0001"),
+      })
+    ).to.be.revertedWith("The number of minted NFT has reached max supply");
+    
+    console.log(await Contract2.getCurrentTokenId());
   });
 
   it("map eoaToContract", async function () {
