@@ -192,7 +192,10 @@ describe("Archive Coin", function () {
     });
 
     await Contract.sendValidatedMessage("aaa", owner.address);
-    await Contract.connect(addr1).sendValidatedMessage("aaa", owner.address);
+    await Contract.connect(addr1).sendValidatedMessage("bbb", owner.address);
     
+    const messages = await Contract.getAllMessagesForChatRoom(owner.address);
+
+    console.log(messages);
   });
 });

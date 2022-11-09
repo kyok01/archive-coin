@@ -93,7 +93,7 @@ contract DockHackDiary is Ownable, IDockHackDiary {
     {
         address contractAddress = getEoaToContract(chatRoomOwner);
         require(contractAddress != address(0), "have not set eoaToContract");
-        
+
         IPartOfERC721 callee = IPartOfERC721(contractAddress);
         if (msg.sender != chatRoomOwner) {
             require(callee.balanceOf(msg.sender) >= 1, "You do not have token");
@@ -117,6 +117,38 @@ contract DockHackDiary is Ownable, IDockHackDiary {
 
     function getMessageForId(uint256 id) public view returns (Message memory) {
         return messagesList[id];
+    }
+
+    function getAllMessagesForChatRoom(address chatRoomOwner)
+        public
+        view
+        returns (Message[] memory)
+    {
+        // if the chat is empty
+        uint256 currentIndex = 0;
+        uint256 totalIndex = _messageIdCounter.current();
+        uint256 sizeOfArr = 0;
+
+        // loads all the message ids on 'ids' list.
+        for (uint i = 1; i <= totalIndex; i++) {
+            // if the sender is different than me.
+            if (messagesList[i].chatRoomOwner == chatRoomOwner) {
+                sizeOfArr += 1;
+            }
+        }
+
+        // give me the ids.
+        Message[] memory messages = new Message[](sizeOfArr);
+
+        for (uint i = 1; i <= totalIndex; i++) {
+            // if the sender is different than me.
+            if (messagesList[i].chatRoomOwner == chatRoomOwner) {
+                messages[currentIndex] = messagesList[i];
+                currentIndex += 1;
+            }
+        }
+
+        return messages;
     }
 
     function getAllMessages() public view returns (Message[] memory) {
