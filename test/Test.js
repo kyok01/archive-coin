@@ -176,4 +176,23 @@ describe("Archive Coin", function () {
     ).to.be.revertedWith("you are not the creator of this contract");
     console.log(await Contract2.getPrice());
   });
+
+  it("sendValidatedMessage with call", async function () {
+    const { Contract, Contract2, owner, addr1} = await loadFixture(
+      deployTokenFixture
+    );
+   
+    await Contract.setEoaToContract(Contract2.address);
+
+    await Contract2.safeMint({
+      value: ethers.utils.parseEther("0.0001"),
+    });
+    await Contract2.connect(addr1).safeMint({
+      value: ethers.utils.parseEther("0.0001"),
+    });
+
+    await Contract.sendValidatedMessage("aaa", owner.address);
+    await Contract.connect(addr1).sendValidatedMessage("aaa", owner.address);
+    
+  });
 });

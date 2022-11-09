@@ -11,6 +11,20 @@ interface IDockHackDiary {
         uint timestamp;
     }
 
+    struct Message {
+        address from;
+        string message;
+        uint timestamp;
+        address chatRoomOwner;
+    }
+
+    event sendMessageEvent(
+        uint indexed _id,
+        address indexed _from,
+        string _message,
+        address _chatRoomOwner
+    );
+
     event HasWithdrawn(uint256 amount, address recipient, uint256 balance);
 
     function setPost(
@@ -35,10 +49,16 @@ interface IDockHackDiary {
      */
     function getEoaToContract(address e) external view returns (address);
 
-    /**
-     * @dev functions about withdrawing
-     */
     function setEoaToContract(address c) external;
+
+    /**
+     * @dev functions about message
+     */
+    function sendValidatedMessage(string memory message, address chatRoomOwner) external;
+
+    function getMessageForId(uint256 id) external view returns (Message memory);
+
+    function getAllMessages() external view returns (Message[] memory);
 
     /**
      * @dev functions about fee

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 import {MyToken} from "./NftContract.sol";
 import {IDockHackDiary} from "./interfaces/IDockHackDiary.sol";
+import {IPartOfERC721} from "./interfaces/IPartOfERC721.sol";
 
 contract DockHackDiary is Ownable, IDockHackDiary {
     using Counters for Counters.Counter;
@@ -14,6 +15,9 @@ contract DockHackDiary is Ownable, IDockHackDiary {
 
     mapping(uint256 => Post) pIdToPost;
     mapping(address => address) eoaToContract;
+
+    Counters.Counter private _messageIdCounter;
+    mapping(uint256 => Message) private messagesList;
 
     constructor() {
         _fee = 0.0001 ether;
@@ -59,10 +63,11 @@ contract DockHackDiary is Ownable, IDockHackDiary {
     /**
      * @dev create NFT Contract
      */
-    function createNftContract(uint256 mintPrice, uint256 maxSupply, string memory uri)
-        public
-        payable
-    {
+    function createNftContract(
+        uint256 mintPrice,
+        uint256 maxSupply,
+        string memory uri
+    ) public payable {
         require(msg.value == _fee, "msg value is incorrect");
         MyToken mytoken = new MyToken(mintPrice, maxSupply, msg.sender, uri);
         address myTokenAddress = address(mytoken);
@@ -76,11 +81,62 @@ contract DockHackDiary is Ownable, IDockHackDiary {
         return eoaToContract[e];
     }
 
-    /**
-     * @dev functions about withdrawing
-     */
     function setEoaToContract(address c) public {
         eoaToContract[msg.sender] = c;
+    }
+
+    /**
+     * @dev functions about message
+     */
+    function sendValidatedMessage(string memory message, address chatRoomOwner)
+        public
+    {
+        address contractAddress = getEoaToContract(chatRoomOwner);
+        require(contractAddress != address(0), "have not set eoaToContract");
+        
+        IPartOfERC721 callee = IPartOfERC721(contractAddress);
+        if (msg.sender != chatRoomOwner) {
+            require(callee.balanceOf(msg.sender) >= 1, "You do not have token");
+        }
+        _sendMessage(message, chatRoomOwner);
+    }
+
+    function _sendMessage(string memory message, address chatRoomOwner)
+        internal
+    {
+        _messageIdCounter.increment();
+        uint256 mId = _messageIdCounter.current();
+        messagesList[mId] = Message(
+            msg.sender,
+            message,
+            block.timestamp,
+            chatRoomOwner
+        );
+        emit sendMessageEvent(mId, msg.sender, message, chatRoomOwner);
+    }
+
+    function getMessageForId(uint256 id) public view returns (Message memory) {
+        return messagesList[id];
+    }
+
+    function getAllMessages() public view returns (Message[] memory) {
+        // if the chat is empty
+        uint256 currentIndex = 0;
+        uint256 totalIndex = _messageIdCounter.current();
+        if (_messageIdCounter.current() == 0) {
+            return new Message[](0);
+        }
+
+        // give me the ids.
+        Message[] memory messages = new Message[](totalIndex);
+
+        // loads all the message ids on 'ids' list.
+        for (uint i = 1; i <= totalIndex; i++) {
+            // if the sender is different than me.
+            messages[currentIndex] = messagesList[i];
+            currentIndex += 1;
+        }
+        return messages;
     }
 
     /**
@@ -102,7 +158,10 @@ contract DockHackDiary is Ownable, IDockHackDiary {
     receive() external payable {}
 
     function withdraw(uint256 amount, address recipient) public onlyOwner {
-        require(amount <= address(this).balance, "Your requesting amount is over treasury.");
+        require(
+            amount <= address(this).balance,
+            "Your requesting amount is over treasury."
+        );
         payable(recipient).transfer(amount);
         emit HasWithdrawn(amount, recipient, address(this).balance);
     }
